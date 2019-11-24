@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -53,6 +55,15 @@ public class UserControllerTest {
         final User user = createValidUser();
         final var response = testRestTemplate.postForEntity(API_1_0_USERS, user, GenericResponse.class);
         assertThat(response.getBody().getMessage()).isNotNull();
+    }
+
+    @Test
+    void postUser_whenUserIsValid_passwordIsHashedInDatabase() {
+        final var user = createValidUser();
+        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        final var users = userRepository.findAll();
+        final var inDB = users.get(0);
+        assertThat(inDB.getPassword()).isNotEqualTo(user.getPassword());
     }
 
     private User createValidUser() {
