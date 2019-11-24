@@ -1,5 +1,6 @@
 package com.hyecheon.socialexample;
 
+import com.hyecheon.socialexample.shared.GenericResponse;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +37,8 @@ public class UserControllerTest {
     @Test
     void postUser_whenUserIsValid_receiveOK() {
         final User user = createValidUser();
-
         final var response = testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
-
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
     }
 
     @Test
@@ -48,6 +46,13 @@ public class UserControllerTest {
         final var user = createValidUser();
         testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
         assertThat(userRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void postUser_whenUserIsValid_receiveSuccessMessage() {
+        final User user = createValidUser();
+        final var response = testRestTemplate.postForEntity(API_1_0_USERS, user, GenericResponse.class);
+        assertThat(response.getBody().getMessage()).isNotNull();
     }
 
     private User createValidUser() {
