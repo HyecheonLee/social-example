@@ -1,5 +1,6 @@
 package com.hyecheon.socialexample;
 
+import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.GenericResponse;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
@@ -159,12 +160,27 @@ public class UserControllerTest {
         final var response = postSignup(user, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
+
     @Test
     void postUser_whenUserHasPasswordWithAllNumber_receiveBadRequest() {
         final var user = createValidUser();
         user.setPassword("123456789");
         final var response = postSignup(user, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserIsInvalid_receiveApiError() {
+        final var user = new User();
+        final var response = postSignup(user, ApiError.class);
+        assertThat(response.getBody().getUrl()).isEqualTo(API_1_0_USERS);
+    }
+
+    @Test
+    void postUser_whenUserIsInvalid_receiveApiErrorWithValidationErrors() {
+        final var user = new User();
+        final var response = postSignup(user, ApiError.class);
+        assertThat(response.getBody().getValidationErrors().size()).isEqualTo(3);
     }
 
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
