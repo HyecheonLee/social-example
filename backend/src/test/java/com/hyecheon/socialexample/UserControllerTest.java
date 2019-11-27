@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -181,6 +182,42 @@ public class UserControllerTest {
         final var user = new User();
         final var response = postSignup(user, ApiError.class);
         assertThat(response.getBody().getValidationErrors().size()).isEqualTo(3);
+    }
+
+    @Test
+    void postUser_whenUserHasNullUsername_receiveMessageOfNullErrorForUsername() {
+        final var user = createValidUser();
+        user.setUsername(null);
+        final var repose = postSignup(user, ApiError.class);
+        final var validationErrors = repose.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("사용자 이름이 반드시 있어야합니다.");
+    }
+
+    @Test
+    void postUser_whenUserHasNullPassword_receiveMessageOfNullErrorForUsername() {
+        final var user = createValidUser();
+        user.setPassword(null);
+        final var repose = postSignup(user, ApiError.class);
+        final var validationErrors = repose.getBody().getValidationErrors();
+        assertThat(validationErrors.get("password")).isEqualTo("반드시 값이 있어야 합니다.");
+    }
+
+    @Test
+    void postUser_whenUserHasInvalidLengthUsername_receiveGenericMessageOfSizeError() {
+        final var user = createValidUser();
+        user.setUsername("abc");
+        final var response = postSignup(user, ApiError.class);
+        final var validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("4~255자 사이의 값을 정해주세요");
+    }
+
+    @Test
+    void postUser_whenUserHasInvalidPasswordPattern_receiveMessageOfPasswordPatternError() {
+        final var user = createValidUser();
+        user.setPassword("alllowercase");
+        final var response = postSignup(user, ApiError.class);
+        final var validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("password")).isEqualTo("형식이 안맞아");
     }
 
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
