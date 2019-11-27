@@ -13,10 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -39,31 +42,133 @@ public class UserControllerTest {
     @Test
     void postUser_whenUserIsValid_receiveOK() {
         final User user = createValidUser();
-        final var response = testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        final var response = postSignup(user, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void postUser_whenUserIsValid_userSavedToDatabase() {
         final var user = createValidUser();
-        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        postSignup(user, Object.class);
         assertThat(userRepository.count()).isEqualTo(1);
     }
 
     @Test
     void postUser_whenUserIsValid_receiveSuccessMessage() {
         final User user = createValidUser();
-        final var response = testRestTemplate.postForEntity(API_1_0_USERS, user, GenericResponse.class);
+        final var response = postSignup(user, GenericResponse.class);
         assertThat(response.getBody().getMessage()).isNotNull();
     }
 
     @Test
     void postUser_whenUserIsValid_passwordIsHashedInDatabase() {
         final var user = createValidUser();
-        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        postSignup(user, Object.class);
         final var users = userRepository.findAll();
         final var inDB = users.get(0);
         assertThat(inDB.getPassword()).isNotEqualTo(user.getPassword());
+    }
+
+    @Test
+    void postUser_whenUserHasNullUsername_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setUsername(null);
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasNullDisplayName_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setDisplayName(null);
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasNullPassword_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setPassword(null);
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasNullUsernameWithLessThanRequired_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setUsername("abc");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasNullDisplayNameWithLessThanRequired_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setDisplayName("abc");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasNullPasswordWithLessThanRequired_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setPassword("abc");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasUsernameExceedsTheLengthLimit_receiveBadRequest() {
+        final var user = createValidUser();
+        final var valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(x -> "a").collect(Collectors.joining());
+        user.setUsername(valueOf256Chars);
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasDisplayNameExceedsTheLengthLimit_receiveBadRequest() {
+        final var user = createValidUser();
+        final var valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(x -> "a").collect(Collectors.joining());
+        user.setDisplayName(valueOf256Chars);
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasPasswordExceedsTheLengthLimit_receiveBadRequest() {
+        final var user = createValidUser();
+        final var valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(x -> "a").collect(Collectors.joining());
+        user.setPassword(valueOf256Chars + "A1");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasPasswordWithAllLowercase_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setPassword("allowercase");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenUserHasPasswordWithAllUppercase_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setPassword("ALLOWERCASE");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+    @Test
+    void postUser_whenUserHasPasswordWithAllNumber_receiveBadRequest() {
+        final var user = createValidUser();
+        user.setPassword("123456789");
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
+        return testRestTemplate.postForEntity(API_1_0_USERS, request, response);
     }
 
     private User createValidUser() {
