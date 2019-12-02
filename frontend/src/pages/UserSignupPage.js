@@ -12,11 +12,21 @@ function UserSignupPage({ actions }) {
     passwordRepeatConfirmed: true
   });
 
+  function deleteError(name) {
+    const {errors} = state;
+    if (errors[name]) {
+      delete errors[name];
+    }
+    return errors;
+  }
+
   const onChange = e => {
     const { name, value } = e.target;
+
     setState({
       ...state,
-      [name]: value
+      [name]: value,
+      errors:deleteError(name)
     });
   };
 
@@ -28,10 +38,13 @@ function UserSignupPage({ actions }) {
     } else {
       passwordRepeatConfirmed = state.password === value;
     }
+    const errors = { ...state.errors };
+    errors.passwordRepeat = passwordRepeatConfirmed ? "" : "비밀번호 확인";
     setState({
       ...state,
       [name]: value,
-      passwordRepeatConfirmed
+      passwordRepeatConfirmed,
+      errors:deleteError(name)
     });
   };
 
@@ -74,7 +87,6 @@ function UserSignupPage({ actions }) {
           hasError={state.errors.displayName && true}
           error={state.errors.displayName}
         />
-        <div className="invalid-feedback">{state.errors.displayName}</div>
       </div>
       <div className="col-12 mb-3">
         <Input
