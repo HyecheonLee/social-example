@@ -4,9 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -23,6 +21,7 @@ public class User {
 
     @NotNull(message = "{constraints.username.NotNull.message}")
     @Size(min = 4, max = 255, message = "{constraints.username.Size.message}")
+    @UniqueUsername
     private String username;
 
     @NotNull
@@ -31,6 +30,6 @@ public class User {
 
     @NotNull
     @Size(min = 8, max = 255)
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d).*$", message = "{constraints.password.Pattern.message}")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message = "{constraints.password.Pattern.message}")
     private String password;
 }

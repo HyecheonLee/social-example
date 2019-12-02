@@ -220,6 +220,25 @@ public class UserControllerTest {
         assertThat(validationErrors.get("password")).isEqualTo("형식이 안맞아");
     }
 
+    @Test
+    void postUser_whenAnotherUserHasSameUsername_receiveBadRequest() {
+        userRepository.save(createValidUser());
+
+        final var user = createValidUser();
+        final var response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void postUser_whenAnotherUserHasSameUsername_receiveMessageOfDuplicateUsername() {
+        userRepository.save(createValidUser());
+
+        final var user = createValidUser();
+        final var response = postSignup(user, ApiError.class);
+        final var validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("이미 존재하는 이름 입니다.");
+    }
+
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(API_1_0_USERS, request, response);
     }
@@ -228,7 +247,7 @@ public class UserControllerTest {
         final var user = new User();
         user.setUsername("test-user");
         user.setDisplayName("test-display");
-        user.setPassword("Password");
+        user.setPassword("Password123");
         return user;
     }
 
