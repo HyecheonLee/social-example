@@ -12,7 +12,7 @@ describe("UserSignupPage", () => {
     it("has header of Sign Up", () => {
       const { container } = render(<UserSignupPage />);
       const header = container.querySelector("h1");
-      expect(header).toHaveTextContent("가입");
+      expect(header).toHaveTextContent("Sign up");
     });
     it("has input for display name", () => {
       let { queryByPlaceholderText } = render(<UserSignupPage />);

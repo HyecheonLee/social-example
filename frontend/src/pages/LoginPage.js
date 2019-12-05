@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import Input from "../components/Input";
+import ButtonWithProgress from "../components/ButtonWithProgress";
+import { stat } from "fs";
 
 export default function LoginPage(props) {
   const [state, setState] = useState({
     username: "",
     password: "",
-    apiError: "Login failure"
+    apiError: "Login failure",
+    pendingApiCall: false
   });
   const onChange = event => {
     const { value, name } = event.target;
@@ -20,11 +23,20 @@ export default function LoginPage(props) {
       username: state.username,
       password: state.password
     };
-    props.actions.postLogin(body).catch(error => {
-      if (error.response) {
-        setState({ apiError: error.response.data.message });
-      }
-    });
+    setState({ pendingApiCall: true });
+    props.actions
+      .postLogin(body)
+      .then(response => {
+        setState({ pendingApiCall: false });
+      })
+      .catch(error => {
+        if (error.response) {
+          setState({
+            apiError: error.response.data.message,
+            pendingApiCall: false
+          });
+        }
+      });
   };
   let disableSubmit = false;
   if (state.username === "") {
@@ -61,13 +73,15 @@ export default function LoginPage(props) {
         </div>
       )}
       <div className="text-center">
-        <button
-          disabled={disableSubmit}
+        <ButtonWithProgress
+          disabled={disableSubmit || state.pendingApiCall}
           onClick={onClickLogin}
           className="btn btn-primary"
+          text="Login"
+          pendingApiCall={state.pendingApiCall}
         >
           Login
-        </button>
+        </ButtonWithProgress>
       </div>
     </div>
   );

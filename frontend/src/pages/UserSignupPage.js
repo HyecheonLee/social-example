@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Input from "../components/Input";
+import ButtonWithProgress from "../components/ButtonWithProgress";
 
 function UserSignupPage({ actions }) {
   let [state, setState] = useState({
@@ -13,7 +14,7 @@ function UserSignupPage({ actions }) {
   });
 
   function deleteError(name) {
-    const {errors} = state;
+    const { errors } = state;
     if (errors[name]) {
       delete errors[name];
     }
@@ -26,7 +27,7 @@ function UserSignupPage({ actions }) {
     setState({
       ...state,
       [name]: value,
-      errors:deleteError(name)
+      errors: deleteError(name)
     });
   };
 
@@ -44,7 +45,7 @@ function UserSignupPage({ actions }) {
       ...state,
       [name]: value,
       passwordRepeatConfirmed,
-      errors:deleteError(name)
+      errors: deleteError(name)
     });
   };
 
@@ -125,21 +126,13 @@ function UserSignupPage({ actions }) {
         />
       </div>
       <div className="text-center">
-        <button
+        <ButtonWithProgress
           disabled={state.pendingApiCall || !state.passwordRepeatConfirmed}
           className="btn btn-primary"
           onClick={onClickSignup}
-        >
-          {state.pendingApiCall && (
-            <div
-              className="spinner-border text-light spinner-border-sm mr-sm-1"
-              role="status"
-            >
-              <span className="sr-only">Loading...</span>
-            </div>
-          )}
-          가입
-        </button>
+          pendingApiCall={state.pendingApiCall}
+          text="Sign up"
+        ></ButtonWithProgress>
       </div>
     </div>
   );
