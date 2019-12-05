@@ -1,15 +1,39 @@
 import React, { useState } from "react";
 import Input from "../components/Input";
 
-export default function LoginPage() {
-  const [state, setState] = useState({ username: "" });
+export default function LoginPage(props) {
+  const [state, setState] = useState({
+    username: "",
+    password: "",
+    apiError: "Login failure"
+  });
   const onChange = event => {
     const { value, name } = event.target;
     setState({
       ...state,
-      [name]: value
+      [name]: value,
+      apiError: undefined
     });
   };
+  const onClickLogin = e => {
+    const body = {
+      username: state.username,
+      password: state.password
+    };
+    props.actions.postLogin(body).catch(error => {
+      if (error.response) {
+        setState({ apiError: error.response.data.message });
+      }
+    });
+  };
+  let disableSubmit = false;
+  if (state.username === "") {
+    disableSubmit = true;
+  }
+  if (state.password === "") {
+    disableSubmit = true;
+  }
+
   return (
     <div className="container">
       <h1 className="text-center">Login</h1>
@@ -31,9 +55,25 @@ export default function LoginPage() {
           placeholder="Your password"
         />
       </div>
+      {state.apiError && (
+        <div className="col-12 mb-3">
+          <div className="alert alert-danger">{state.apiError}</div>
+        </div>
+      )}
       <div className="text-center">
-        <button className="btn btn-primary">Login</button>
+        <button
+          disabled={disableSubmit}
+          onClick={onClickLogin}
+          className="btn btn-primary"
+        >
+          Login
+        </button>
       </div>
     </div>
   );
 }
+LoginPage.defaultProps = {
+  actions: {
+    postLogin: () => new Promise((resolve, reject) => resolve({}))
+  }
+};
