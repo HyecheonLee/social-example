@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Input from "../components/Input";
 import ButtonWithProgress from "../components/ButtonWithProgress";
-import { stat } from "fs";
 
 export default function LoginPage(props) {
   const [state, setState] = useState({
@@ -86,6 +85,7 @@ export default function LoginPage(props) {
     </div>
   );
 }
+
 LoginPage.defaultProps = {
   actions: {
     postLogin: () => new Promise((resolve, reject) => resolve({}))

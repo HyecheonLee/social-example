@@ -76,7 +76,7 @@ function UserSignupPage({ actions }) {
   };
   return (
     <div className="container">
-      <h1 className="text-center">가입</h1>
+      <h1 className="text-center">Sign up</h1>
       <div className="col-12 mb-3">
         <Input
           label="아이디"
