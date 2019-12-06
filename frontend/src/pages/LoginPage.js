@@ -6,7 +6,7 @@ export default function LoginPage(props) {
   const [state, setState] = useState({
     username: "",
     password: "",
-    apiError: "Login failure",
+    apiError: undefined,
     pendingApiCall: false
   });
   const onChange = event => {
@@ -22,15 +22,17 @@ export default function LoginPage(props) {
       username: state.username,
       password: state.password
     };
-    setState({ pendingApiCall: true });
+    setState({ ...state, pendingApiCall: true });
     props.actions
       .postLogin(body)
       .then(response => {
-        setState({ pendingApiCall: false });
+        setState({ ...state, pendingApiCall: false });
       })
+      .then(() => props.history.push("/"))
       .catch(error => {
         if (error.response) {
           setState({
+            ...state,
             apiError: error.response.data.message,
             pendingApiCall: false
           });
