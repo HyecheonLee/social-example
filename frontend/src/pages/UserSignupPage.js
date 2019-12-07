@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Input from "../components/Input";
 import ButtonWithProgress from "../components/ButtonWithProgress";
 
-function UserSignupPage({ actions }) {
+function UserSignupPage({ actions, history }) {
   let [state, setState] = useState({
     displayName: "",
     username: "",
@@ -61,6 +61,9 @@ function UserSignupPage({ actions }) {
         .postSignup(user)
         .then(response => {
           setState({ ...state, pendingApiCall: false });
+        })
+        .then(() => {
+          history.push("/");
         })
         .catch(apiError => {
           let errors = { ...state.errors };
@@ -144,6 +147,9 @@ UserSignupPage.defaultProps = {
       new Promise((resolve, reject) => {
         resolve({});
       })
+  },
+  history: {
+    push: () => {}
   }
 };
 export default UserSignupPage;

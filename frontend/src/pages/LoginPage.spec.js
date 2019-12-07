@@ -204,7 +204,7 @@ describe("LoginPage", () => {
     });
     it("redirects to homePage after successful login", async () => {
       const actions = {
-        postLogin: jest.fn().mockImplementation({})
+        postLogin: jest.fn().mockResolvedValue({})
       };
       const history = {
         push: jest.fn()
