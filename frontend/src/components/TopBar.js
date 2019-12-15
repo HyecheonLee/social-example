@@ -2,25 +2,16 @@ import logo from "../assets/hoaxify-logo.png";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/auth";
 
 function TopBar() {
-  const {
-    id,
-    username,
-    displayName,
-    image,
-    password,
-    isLoggedIn
-  } = useSelector(state => ({ ...state }));
+  const auth = useSelector(state => ({ ...state.auth }));
   const dispatch = useDispatch();
   let links;
   const onClickLogout = () => {
-    const action = {
-      type: "logout-success"
-    };
-    dispatch(action);
+    dispatch(logout());
   };
-  if (isLoggedIn) {
+  if (auth.isLoggedIn) {
     links = (
       <>
         <ul className="nav navbar-nav ml-auto">
@@ -32,7 +23,7 @@ function TopBar() {
             Logout
           </li>
           <li className="nav-item">
-            <Link to={`/${username}`} className="nav-link">
+            <Link to={`/${auth.username}`} className="nav-link">
               My Profile
             </Link>
           </li>

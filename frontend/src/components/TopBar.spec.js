@@ -1,10 +1,10 @@
 import React from "react";
-import { fireEvent, render } from "@testing-library/react";
+import {fireEvent, render} from "@testing-library/react";
 import TopBar from "./TopBar";
-import { MemoryRouter } from "react-router-dom";
-import { createStore } from "redux";
-import authReducer from "../redux/authReducer";
-import { Provider } from "react-redux";
+import {MemoryRouter} from "react-router-dom";
+import {createStore} from "redux";
+import {Provider} from "react-redux";
+import rootReducer from "../redux";
 
 const loggedInState = {
   id: 1,
@@ -24,7 +24,7 @@ const defaultState = {
 };
 
 const setup = (state = defaultState) => {
-  const store = createStore(authReducer, state);
+  const store = createStore(rootReducer, { auth: { ...state } });
   return render(
     <Provider store={store}>
       <MemoryRouter>

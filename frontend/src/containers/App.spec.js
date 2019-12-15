@@ -3,11 +3,14 @@ import {render, fireEvent} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import App from "./App";
 import {createStore} from "redux";
-import authReducer from "../redux/authReducer";
 import {Provider} from "react-redux";
+import rootReducer from "../redux";
+import Axios from "axios";
+import {waitForElement} from "@testing-library/dom";
+
 
 const setup = path => {
-	const store = createStore(authReducer);
+	const store = createStore(rootReducer);
 	return render(
 		<Provider store={store}>
 			<MemoryRouter initialEntries={[path]}>
@@ -79,5 +82,31 @@ describe("App", () => {
 		const logo = container.querySelector("img");
 		fireEvent.click(logo);
 		expect(queryByTestId("homepage")).toBeInTheDocument();
+	});
+	it("displays My Profile on TopBar after login success", async () => {
+		const {queryByPlaceholderText, container, queryByText} = setup("/login");
+		const changeEvent = (content) => {
+			return {
+				target: {
+					value: content
+				}
+			}
+		};
+		const usernameInput = queryByPlaceholderText("Your username");
+		fireEvent.change(usernameInput, changeEvent('my-user-name'));
+		const passwordInput = queryByPlaceholderText("Your password");
+		fireEvent.change(passwordInput, changeEvent("P4ssword"));
+		const button = container.querySelector("button");
+		Axios.post = jest.fn().mockResolvedValue({
+			data: {
+				id: 1,
+				username: "user1",
+				displayName: "display1",
+				image: "profile1.png"
+			}
+		});
+		fireEvent.click(button);
+		const myProfileLink = await waitForElement(() => queryByText("My Profile"));
+		expect(myProfileLink).toBeInTheDocument();
 	});
 });
