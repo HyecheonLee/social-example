@@ -10,6 +10,7 @@ import configureStore from "../redux/configureStore";
 
 beforeEach(() => {
 	localStorage.clear();
+	delete Axios.defaults.headers.common['Authorization'];
 });
 
 const setup = path => {
@@ -179,5 +180,55 @@ describe("App", () => {
 		const {queryByText} = setup("/");
 		const myProfileLink = queryByText("My Profile");
 		expect(myProfileLink).toBeInTheDocument();
+	});
+	it("sets axios authorization with base64 encoded user credentials after login success", async () => {
+		const {queryByPlaceholderText, container, queryByText} = setup("/login");
+		const usernameInput = queryByPlaceholderText("Your username");
+		fireEvent.change(usernameInput, changeEvent('my-user-name'));
+		const passwordInput = queryByPlaceholderText("Your password");
+		fireEvent.change(passwordInput, changeEvent("P4ssword"));
+		const button = container.querySelector("button");
+		Axios.post = jest.fn().mockResolvedValue({
+			data: {
+				id: 1,
+				username: "user1",
+				displayName: "display1",
+				image: "profile1.png"
+			}
+		});
+		fireEvent.click(button);
+		await waitForElement(() => queryByText("My Profile"));
+		const axiosAuthorization = Axios.defaults.headers.common['Authorization'];
+		const endcoded = btoa("user1:P4ssword");
+		const expectedAuthorization = `Basic ${endcoded}`;
+		expect(axiosAuthorization).toBe(expectedAuthorization);
+	});
+	it("sets axios authorization with base64 encoded user credentials when storage has local storage", async () => {
+		localStorage.setItem('hoax-auth', JSON.stringify({
+			id: 1,
+			username: "user1",
+			displayName: "display1",
+			image: "profile1.png",
+			isLoggedIn: true,
+		}));
+		setup("/");
+		const axiosAuthorization = Axios.defaults.headers.common['Authorization'];
+		const endcoded = btoa("user1:P4ssword");
+		const expectedAuthorization = `Basic ${endcoded}`;
+		expect(axiosAuthorization).toBe(expectedAuthorization);
+	});
+	it("removes axios authorization header when logout", async () => {
+		localStorage.setItem('hoax-auth', JSON.stringify({
+			id: 1,
+			username: "user1",
+			displayName: "display1",
+			image: "profile1.png",
+			isLoggedIn: true,
+		}));
+		const {queryByText} = setup("/");
+		fireEvent.click(queryByText("Logout"));
+
+		const axiosAuthorization = Axios.defaults.headers.common['Authorization'];
+		expect(axiosAuthorization).toBeFalsy();
 	});
 });

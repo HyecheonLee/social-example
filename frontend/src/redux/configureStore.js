@@ -2,6 +2,7 @@ import {applyMiddleware, createStore} from "redux";
 import rootReducer from "./index";
 import thunk from "redux-thunk";
 import logger from "redux-logger";
+import {setAuthorizationHeader} from "../api/apiCalls";
 
 const configureStore = (addLogger = true) => {
 	const localStorageData = localStorage.getItem("hoax-auth");
@@ -15,7 +16,8 @@ const configureStore = (addLogger = true) => {
 	};
 	if (localStorageData) {
 		try {
-			persistedState = JSON.parse(localStorageData)
+			persistedState = JSON.parse(localStorageData);
+			setAuthorizationHeader(persistedState);
 		} catch (e) {
 
 		}
@@ -28,7 +30,8 @@ const configureStore = (addLogger = true) => {
 		middleware
 	);
 	store.subscribe(() => {
-		localStorage.setItem("hoax-auth", JSON.stringify(store.getState()))
+		localStorage.setItem("hoax-auth", JSON.stringify(store.getState()));
+		setAuthorizationHeader(store.getState());
 	});
 	return store;
 };
