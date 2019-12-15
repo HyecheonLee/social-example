@@ -1,16 +1,15 @@
 import React from "react";
-import {render, fireEvent} from "@testing-library/react";
+import {fireEvent, render} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import App from "./App";
-import {createStore} from "redux";
 import {Provider} from "react-redux";
-import rootReducer from "../redux";
 import Axios from "axios";
 import {waitForElement} from "@testing-library/dom";
+import configureStore from "../redux/configureStore";
 
 
 const setup = path => {
-	const store = createStore(rootReducer);
+	const store = configureStore(false);
 	return render(
 		<Provider store={store}>
 			<MemoryRouter initialEntries={[path]}>

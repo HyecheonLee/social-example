@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import Input from "../components/Input";
 import ButtonWithProgress from "../components/ButtonWithProgress";
 import {useDispatch} from "react-redux";
-import {loginSuccess} from "../redux/auth";
+import {loginHandler} from "../redux/auth";
 
 
 export default function LoginPage(props) {
@@ -28,15 +28,9 @@ export default function LoginPage(props) {
 			password: state.password
 		};
 		setState({...state, pendingApiCall: true});
-		props.actions
-			.postLogin(body)
+		dispatch(loginHandler(body))
 			.then(response => {
 				setState({...state, pendingApiCall: false});
-        const {password} = body;
-        dispatch(loginSuccess({
-          ...response.data,
-          password
-        }));
 			})
 			.then(() => props.history.push("/"))
 			.catch(error => {
