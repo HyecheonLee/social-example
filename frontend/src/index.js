@@ -10,17 +10,8 @@ import {applyMiddleware, createStore} from "redux";
 import logger from "redux-logger";
 import rootReducer from "./redux";
 
-const loggedInState = {
-	id: 1,
-	username: "user1",
-	displayName: "display1",
-	image: "profile1.png",
-	password: "P4ssword",
-	isLoggedIn: true
-};
 const store = createStore(
 	rootReducer,
-	{auth: {...loggedInState}},
 	applyMiddleware(logger)
 );
 

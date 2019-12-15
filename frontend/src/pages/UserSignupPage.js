@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Input from "../components/Input";
 import ButtonWithProgress from "../components/ButtonWithProgress";
+import { loginSuccess } from "../redux/auth";
+import { useDispatch } from "react-redux";
 
 function UserSignupPage({ actions, history }) {
   let [state, setState] = useState({
@@ -12,6 +14,7 @@ function UserSignupPage({ actions, history }) {
     errors: {},
     passwordRepeatConfirmed: true
   });
+  const dispatch = useDispatch();
 
   function deleteError(name) {
     const { errors } = state;
@@ -40,7 +43,9 @@ function UserSignupPage({ actions, history }) {
       passwordRepeatConfirmed = state.password === value;
     }
     const errors = { ...state.errors };
-    errors.passwordRepeat = passwordRepeatConfirmed ? "" : "비밀번호 확인";
+    errors.passwordRepeat = passwordRepeatConfirmed
+      ? ""
+      : "Repeat your password";
     setState({
       ...state,
       [name]: value,
@@ -60,10 +65,33 @@ function UserSignupPage({ actions, history }) {
       actions
         .postSignup(user)
         .then(response => {
-          setState({ ...state, pendingApiCall: false });
-        })
-        .then(() => {
-          history.push("/");
+          const body = {
+            username: state.username,
+            password: state.password
+          };
+          setState({ ...state, pendingApiCall: true });
+          actions
+            .postLogin(body)
+            .then(response => {
+              setState({ ...state, pendingApiCall: false });
+              const { password } = body;
+              dispatch(
+                loginSuccess({
+                  ...response.data,
+                  password
+                })
+              );
+            })
+            .then(() => history.push("/"))
+            .catch(error => {
+              if (error.response) {
+                setState({
+                  ...state,
+                  apiError: error.response.data.message,
+                  pendingApiCall: false
+                });
+              }
+            });
         })
         .catch(apiError => {
           let errors = { ...state.errors };
@@ -82,50 +110,50 @@ function UserSignupPage({ actions, history }) {
       <h1 className="text-center">Sign up</h1>
       <div className="col-12 mb-3">
         <Input
-          label="아이디"
+          label="displayName"
           className="form-control"
           name={"displayName"}
           value={state.displayName}
           onChange={onChange}
-          placeholder={"당신의 아이디"}
+          placeholder={"Your display name"}
           hasError={state.errors.displayName && true}
           error={state.errors.displayName}
         />
       </div>
       <div className="col-12 mb-3">
         <Input
-          label="이름"
+          label="username"
           className="form-control"
           name={"username"}
           value={state.username}
           onChange={onChange}
-          placeholder={"당신의 성함"}
+          placeholder={"Your username"}
           hasError={state.errors.username && true}
           error={state.errors.username}
         />
       </div>
       <div className="col-12 mb-3">
         <Input
-          label="비밀번호"
+          label="password"
           className="form-control"
           name={"password"}
           value={state.password}
           type="password"
           onChange={onChangePassword}
-          placeholder={"당신의 비밀번호"}
+          placeholder={"Your password"}
           hasError={state.errors.password && true}
           error={state.errors.password}
         />
       </div>
       <div className="col-12 mb-3">
         <Input
-          label="비밀번호 확인"
+          label="Repeat your password"
           className="form-control"
           name={"passwordRepeat"}
           value={state.passwordRepeat}
           type="password"
           onChange={onChangePassword}
-          placeholder={"비밀번호 확인"}
+          placeholder={"Repeat your password"}
         />
       </div>
       <div className="text-center">
@@ -135,7 +163,7 @@ function UserSignupPage({ actions, history }) {
           onClick={onClickSignup}
           pendingApiCall={state.pendingApiCall}
           text="Sign up"
-        ></ButtonWithProgress>
+        />
       </div>
     </div>
   );

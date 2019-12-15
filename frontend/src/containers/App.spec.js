@@ -21,6 +21,13 @@ const setup = path => {
 };
 
 describe("App", () => {
+	const changeEvent = value => {
+		return {
+			target: {
+				value
+			}
+		};
+	};
 	it("displays homepage when url is /", () => {
 		const {queryByTestId} = setup("/");
 		expect(queryByTestId("homepage")).toBeInTheDocument();
@@ -85,19 +92,42 @@ describe("App", () => {
 	});
 	it("displays My Profile on TopBar after login success", async () => {
 		const {queryByPlaceholderText, container, queryByText} = setup("/login");
-		const changeEvent = (content) => {
-			return {
-				target: {
-					value: content
-				}
-			}
-		};
 		const usernameInput = queryByPlaceholderText("Your username");
 		fireEvent.change(usernameInput, changeEvent('my-user-name'));
 		const passwordInput = queryByPlaceholderText("Your password");
 		fireEvent.change(passwordInput, changeEvent("P4ssword"));
 		const button = container.querySelector("button");
 		Axios.post = jest.fn().mockResolvedValue({
+			data: {
+				id: 1,
+				username: "user1",
+				displayName: "display1",
+				image: "profile1.png"
+			}
+		});
+		fireEvent.click(button);
+		const myProfileLink = await waitForElement(() => queryByText("My Profile"));
+		expect(myProfileLink).toBeInTheDocument();
+	});
+	it("displays My Profile on TopBar after signup success", async () => {
+		const {queryByPlaceholderText, container, queryByText} = setup("/signup");
+		const displayNameInput = queryByPlaceholderText("Your display name");
+		const usernameInput = queryByPlaceholderText("Your username");
+		const passwordInput = queryByPlaceholderText("Your password");
+		const passwordRepeatInput = queryByPlaceholderText("Repeat your password");
+
+
+		fireEvent.change(displayNameInput, changeEvent("display1"));
+		fireEvent.change(usernameInput, changeEvent("user1"));
+		fireEvent.change(passwordInput, changeEvent("P4ssword"));
+		fireEvent.change(passwordRepeatInput, changeEvent("P4ssword"));
+
+		const button = container.querySelector("button");
+		Axios.post = jest.fn().mockResolvedValue({
+			data: {
+				message: "User saved"
+			}
+		}).mockResolvedValueOnce({
 			data: {
 				id: 1,
 				username: "user1",
