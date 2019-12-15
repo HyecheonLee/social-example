@@ -75,4 +75,5 @@ describe("TopBar", () => {
       expect(loginLink).toBeInTheDocument();
     });
   });
+
 });

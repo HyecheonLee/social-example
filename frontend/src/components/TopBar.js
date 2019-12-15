@@ -1,34 +1,33 @@
 import logo from "../assets/hoaxify-logo.png";
 import React from "react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/auth";
+import {Link} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
+import {logout} from "../redux/auth";
 
 function TopBar() {
   const auth = useSelector(state => ({ ...state.auth }));
   const dispatch = useDispatch();
-  let links;
+
   const onClickLogout = () => {
     dispatch(logout());
   };
+  let links;
   if (auth.isLoggedIn) {
     links = (
-      <>
-        <ul className="nav navbar-nav ml-auto">
-          <li
-            onClick={onClickLogout}
-            className="nav-item nav-link"
-            style={{ cursor: "pointer" }}
-          >
-            Logout
-          </li>
-          <li className="nav-item">
-            <Link to={`/${auth.username}`} className="nav-link">
-              My Profile
-            </Link>
-          </li>
-        </ul>
-      </>
+      <ul className="nav navbar-nav ml-auto">
+        <li
+          onClick={onClickLogout}
+          className="nav-item nav-link"
+          style={{ cursor: "pointer" }}
+        >
+          Logout
+        </li>
+        <li className="nav-item">
+          <Link to={`/${auth.username}`} className="nav-link">
+            My Profile
+          </Link>
+        </li>
+      </ul>
     );
   } else {
     links = (
