@@ -1,7 +1,7 @@
 import logo from "../assets/hoaxify-logo.png";
 import React from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 function TopBar() {
   const {
@@ -12,12 +12,25 @@ function TopBar() {
     password,
     isLoggedIn
   } = useSelector(state => ({ ...state }));
+  const dispatch = useDispatch();
   let links;
+  const onClickLogout = () => {
+    const action = {
+      type: "logout-success"
+    };
+    dispatch(action);
+  };
   if (isLoggedIn) {
     links = (
       <>
         <ul className="nav navbar-nav ml-auto">
-          <li className="nav-item nav-link">Logout</li>
+          <li
+            onClick={onClickLogout}
+            className="nav-item nav-link"
+            style={{ cursor: "pointer" }}
+          >
+            Logout
+          </li>
           <li className="nav-item">
             <Link to={`/${username}`} className="nav-link">
               My Profile
