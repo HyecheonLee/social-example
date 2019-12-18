@@ -1,9 +1,12 @@
 package com.hyecheon.socialexample.user;
 
 public class Views {
-    public interface Base {
+    public Views() {
     }
 
-    public interface Sensitive extends Base {
+    public static interface Base {
+    }
+
+    public static interface Sensitive extends Base {
     }
 }

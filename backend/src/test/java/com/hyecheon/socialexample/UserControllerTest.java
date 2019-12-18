@@ -2,6 +2,7 @@ package com.hyecheon.socialexample;
 
 import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.GenericResponse;
+import com.hyecheon.socialexample.user.TestPage;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.lang.reflect.ParameterizedType;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -234,6 +240,22 @@ public class UserControllerTest {
         final var response = postSignup(user, ApiError.class);
         final var validationErrors = response.getBody().getValidationErrors();
         assertThat(validationErrors.get("username")).isEqualTo("이미 존재하는 이름 입니다.");
+    }
+
+    @Test
+    public void getUsers_whenThereAreNoUsersInDB_receiveOK() {
+        ResponseEntity<TestPage<?>> response = testRestTemplate.exchange(API_1_0_USERS, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        });
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void getUsers_whenThereAreNoUsersInDB_receivePageWithZeroItems() {
+        ResponseEntity<TestPage<?>> response = testRestTemplate.exchange(API_1_0_USERS, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        });
+
+        assertThat(response.getBody().getTotalElements()).isEqualTo(0);
     }
 
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
