@@ -2,6 +2,7 @@ package com.hyecheon.socialexample.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Page<User> findAll(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public Page<?> findAll(Pageable pageable) {
+        return userRepository.getAllUsersProjection(PageRequest.of(0, 10));
     }
 }
