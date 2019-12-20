@@ -19,7 +19,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Page<?> findAll(Pageable pageable) {
-        return userRepository.getAllUsersProjection(PageRequest.of(0, 10));
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(PageRequest.of(0, 10));
     }
 }

@@ -25,18 +25,15 @@ import java.util.Collection;
 public class User implements UserDetails {
     @Id
     @GeneratedValue
-    @JsonView(Views.Base.class)
     private long id;
 
     @NotNull(message = "{constraints.username.NotNull.message}")
     @Size(min = 4, max = 255, message = "{constraints.username.Size.message}")
     @UniqueUsername
-    @JsonView(Views.Base.class)
     private String username;
 
     @NotNull
     @Size(min = 4, max = 255)
-    @JsonView(Views.Base.class)
     private String displayName;
 
     @NotNull
@@ -44,7 +41,6 @@ public class User implements UserDetails {
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message = "{constraints.password.Pattern.message}")
     private String password;
 
-    @JsonView(Views.Base.class)
     private String image;
 
     @Override
