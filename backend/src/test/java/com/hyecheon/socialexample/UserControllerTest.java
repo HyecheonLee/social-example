@@ -13,15 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -244,7 +242,7 @@ public class UserControllerTest {
 
     @Test
     public void getUsers_whenThereAreNoUsersInDB_receiveOK() {
-        ResponseEntity<TestPage<?>> response = testRestTemplate.exchange(API_1_0_USERS, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<TestPage<?>> response = getUsers(new ParameterizedTypeReference<>() {
         });
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -252,11 +250,34 @@ public class UserControllerTest {
 
     @Test
     public void getUsers_whenThereAreNoUsersInDB_receivePageWithZeroItems() {
-        ResponseEntity<TestPage<?>> response = testRestTemplate.exchange(API_1_0_USERS, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        final ResponseEntity<TestPage<Object>> response = getUsers(new ParameterizedTypeReference<TestPage<Object>>() {
         });
-
         assertThat(response.getBody().getTotalElements()).isEqualTo(0);
     }
+
+    @Test
+    public void getUsers_whenThereIsAUserInDB_receivePageWithUser() {
+        userRepository.save(TestUtil.createValidUser());
+        final ResponseEntity<TestPage<Object>> response = getUsers(new ParameterizedTypeReference<>() {
+        });
+        assertThat(response.getBody().getNumberOfElements()).isEqualTo(1);
+    }
+
+    @Test
+    void getUsers_whenThereIsAUserInDB_receiveUserWithoutPassword() {
+        userRepository.save(TestUtil.createValidUser());
+        var response = getUsers(new ParameterizedTypeReference<TestPage<Map<String, Object>>>() {
+        });
+
+        final Map<String, Object> entity = response.getBody().getContent().get(0);
+        System.out.println(entity);
+        assertThat(entity.containsKey("password")).isFalse();
+    }
+
+    private <T> ResponseEntity<T> getUsers(ParameterizedTypeReference<T> parameter) {
+        return testRestTemplate.exchange(API_1_0_USERS, HttpMethod.GET, null, parameter);
+    }
+
 
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(API_1_0_USERS, request, response);

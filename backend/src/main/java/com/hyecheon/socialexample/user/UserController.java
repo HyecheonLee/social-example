@@ -1,5 +1,6 @@
 package com.hyecheon.socialexample.user;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.GenericResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,9 @@ public class UserController {
     }
 
     @GetMapping("/api/1.0/users")
+    @JsonView(Views.Base.class)
     public ResponseEntity<Page<?>> getUsers(Pageable pageable) {
-        final Page<User> userPage = userService.findAll(pageable);
+        final Page<?> userPage = userService.findAll(pageable);
         return new ResponseEntity<>(userPage, HttpStatus.OK);
     }
 
