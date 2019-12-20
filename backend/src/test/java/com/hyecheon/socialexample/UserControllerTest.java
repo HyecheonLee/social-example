@@ -5,6 +5,7 @@ import com.hyecheon.socialexample.shared.GenericResponse;
 import com.hyecheon.socialexample.user.TestPage;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
+import com.hyecheon.socialexample.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -36,6 +38,8 @@ public class UserControllerTest {
     TestRestTemplate testRestTemplate;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     @BeforeEach
     void cleanup() {
@@ -316,6 +320,21 @@ public class UserControllerTest {
         final ResponseEntity<TestPage<Object>> response = getUsers(path, new ParameterizedTypeReference<TestPage<Object>>() {
         });
         assertThat(response.getBody().getNumber()).isEqualTo(0);
+    }
+
+    @Test
+    void getUsers_whenUserLoggedIn_receivePageWithoutLoggedInUser() {
+        userService.save(TestUtil.createValidUser("user1"));
+        userService.save(TestUtil.createValidUser("user2"));
+        userService.save(TestUtil.createValidUser("user3"));
+        authenticate("user1");
+        final ResponseEntity<TestPage<Object>> response = getUsers(new ParameterizedTypeReference<TestPage<Object>>() {
+        });
+        assertThat(response.getBody().getTotalElements()).isEqualTo(2);
+    }
+
+    private void authenticate(String username) {
+        testRestTemplate.getRestTemplate().getInterceptors().add(new BasicAuthenticationInterceptor(username, "P4ssword"));
     }
 
     private <T> ResponseEntity<T> getUsers(ParameterizedTypeReference<T> parameter) {

@@ -19,11 +19,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Page<User> findAll(int page, int size) {
-        return findAll(PageRequest.of(page, size));
+    public Page<User> findAll(User user, int page, int size) {
+        return findAll(user, PageRequest.of(page, size));
     }
 
-    public Page<User> findAll(Pageable pageable) {
+    public Page<User> findAll(User loggedInUser, Pageable pageable) {
+        if (loggedInUser != null) {
+            return userRepository.findByUsernameNot(loggedInUser.getUsername(), pageable);
+        }
         return userRepository.findAll(pageable);
     }
 }

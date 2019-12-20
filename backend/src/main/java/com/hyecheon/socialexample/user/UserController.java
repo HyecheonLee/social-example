@@ -1,6 +1,7 @@
 package com.hyecheon.socialexample.user;
 
 import com.hyecheon.socialexample.error.ApiError;
+import com.hyecheon.socialexample.shared.CurrentUser;
 import com.hyecheon.socialexample.shared.GenericResponse;
 import com.hyecheon.socialexample.user.vm.UserVM;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +33,8 @@ public class UserController {
     }
 
     @GetMapping("/api/1.0/users")
-    public ResponseEntity<Page<?>> getUsers(@PageableDefault(page = 0, size = 10) Pageable pageable) {
-        final Page<?> userPage = userService.findAll(pageable).map(UserVM::new);
+    public ResponseEntity<Page<?>> getUsers(@AuthenticationPrincipal User loggedInUser, @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        final Page<?> userPage = userService.findAll(loggedInUser, pageable).map(UserVM::new);
         return new ResponseEntity<>(userPage, HttpStatus.OK);
     }
 
