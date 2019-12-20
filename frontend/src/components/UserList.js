@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import * as apiCalls from "../api/apiCalls";
+import UserListItem from "./UserListItem";
 
 function UserList(props) {
   const [page, pageState] = useState({
@@ -15,15 +16,13 @@ function UserList(props) {
         ...response.data
       });
     });
-  }, []);
+  }, [page.number, page.size]);
   return (
-      <div children="card">
+      <div className="card">
         <h3 className="card-title m-auto">Users</h3>
         <div className="list-group list-group-flush" data-testid="usergroup">
           {page.content.map(user => {
-            return (
-                <div key={user.id}
-                     className="list-group-item-action">{`${user.displayName}@${user.username}`}</div>
+            return (<UserListItem key={user.username} user={user}/>
             )
           })}
         </div>
