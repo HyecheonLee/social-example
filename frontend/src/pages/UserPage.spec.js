@@ -29,7 +29,7 @@ const setup = (props) => {
 describe("HomePage", () => {
   describe("Layout", () => {
     it("has root page div", () => {
-      const {queryByTestId} = setup();
+      const {queryByTestId} = setup({match});
       const UserPageDiv = queryByTestId("UserPage");
       expect(UserPageDiv).toBeInTheDocument();
     });

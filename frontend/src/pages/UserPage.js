@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import * as apiCalls from '../api/apiCalls';
+import ProfileCard from "../components/ProfileCard";
 
 export default function UserPage({match}) {
   const [state, setState] = useState({
@@ -36,6 +37,6 @@ export default function UserPage({match}) {
     );
   }
   return <div data-testid="UserPage">
-    {user && (<span>{`${user.displayName}@${user.username}`}</span>)}
+    {user && (<ProfileCard user={user}/>)}
   </div>;
 }
