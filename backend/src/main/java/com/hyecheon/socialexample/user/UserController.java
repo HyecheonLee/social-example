@@ -38,6 +38,11 @@ public class UserController {
         return new ResponseEntity<>(userPage, HttpStatus.OK);
     }
 
+    @GetMapping("/api/1.0/users/{username}")
+    public ResponseEntity<?> getUserByName(@PathVariable String username) {
+        return new ResponseEntity<>(userService.findByUsername(username), HttpStatus.OK);
+    }
+
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {

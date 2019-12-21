@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -333,6 +334,34 @@ public class UserControllerTest {
         assertThat(response.getBody().getTotalElements()).isEqualTo(2);
     }
 
+    @Test
+    void getUserByUsername_whenUserExist_receiveOk() {
+        String username = "test-user";
+        userService.save(TestUtil.createValidUser(username));
+        final ResponseEntity<Object> response = getUser(username, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void getUserByUsername_whenUserExist_receiveUserWithoutPassword() {
+        String username = "test-user";
+        userService.save(TestUtil.createValidUser(username));
+        final ResponseEntity<String> response = getUser(username, String.class);
+        assertThat(Objects.requireNonNull(response.getBody()).contains("password")).isFalse();
+    }
+
+    @Test
+    void getUserByUsername_whenUserDoesNotExist_receiveNotFound() {
+        final ResponseEntity<Object> response = getUser("unknown-user", Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void getUserByUsername_whenUserDoesNotExist_receiveApiError() {
+        final ResponseEntity<ApiError> response = getUser("unknown-user", ApiError.class);
+        assertThat(response.getBody().getMessage().contains("unknown-user")).isTrue();
+    }
+
     private void authenticate(String username) {
         testRestTemplate.getRestTemplate().getInterceptors().add(new BasicAuthenticationInterceptor(username, "P4ssword"));
     }
@@ -348,5 +377,10 @@ public class UserControllerTest {
 
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(API_1_0_USERS, request, response);
+    }
+
+    public <T> ResponseEntity<T> getUser(String username, Class<T> responseType) {
+        final String path = API_1_0_USERS + "/" + username;
+        return testRestTemplate.getForEntity(path, responseType);
     }
 }

@@ -1,5 +1,7 @@
 package com.hyecheon.socialexample.user;
 
+import com.hyecheon.socialexample.error.NotFoundException;
+import com.hyecheon.socialexample.user.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,5 +30,9 @@ public class UserService {
             return userRepository.findByUsernameNot(loggedInUser.getUsername(), pageable);
         }
         return userRepository.findAll(pageable);
+    }
+
+    public UserVM findByUsername(String username) {
+        return userRepository.findByUsername(username).map(UserVM::new).orElseThrow(() -> new NotFoundException(username + " not found"));
     }
 }
