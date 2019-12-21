@@ -45,6 +45,19 @@ describe("HomePage", () => {
       const alert = await waitForElement(() => queryByText("User not found"));
       expect(alert).toBeInTheDocument();
     });
+    it("displays spinner while loading user data", async () => {
+      const mockDelayedResponse = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve(mockSuccessGetUser)
+          }, 300)
+        })
+      });
+      apiCalls.getUser = mockDelayedResponse;
+      const {queryByText} = setup({match});
+      const spinner = await waitForElement(() => queryByText("Loading..."));
+      expect(spinner).toBeInTheDocument();
+    });
   });
   describe("Lifecycle", () => {
     it("call getUser when it is rendered", () => {

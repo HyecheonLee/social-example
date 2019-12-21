@@ -1,33 +1,48 @@
 import React, {useEffect, useState} from "react";
-import * as apiCalls from '../api/apiCalls';
+import * as apiCalls from "../api/apiCalls";
 import ProfileCard from "../components/ProfileCard";
 
 export default function UserPage({match}) {
   const [state, setState] = useState({
     user: undefined,
-    userNotFound: false
+    userNotFound: false,
+    isLoadingUser: false
   });
   const {user} = state;
   useEffect(() => {
     const username = match.params.username;
-    apiCalls.getUser(username)
+    setState(value => ({...value, isLoadingUser: true}));
+    apiCalls
+    .getUser(username)
     .then(response => {
       setState({
         user: {...response.data},
-        userNotFound: false
-      })
-    }).catch(error => {
+        userNotFound: false,
+        isLoadingUser: false
+      });
+    })
+    .catch(error => {
       setState({
         user: undefined,
-        userNotFound: true
-      })
+        userNotFound: true,
+        isLoadingUser: false
+      });
     });
     return () => {
       setState({user: undefined});
     };
   }, [match.params.username]);
-  if (state.userNotFound) {
-    return (
+  let pageContent;
+  if (state.isLoadingUser) {
+    pageContent = (
+        <div className="d-flex">
+          <div className="spinner-border text-black-50 m-auto">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+    );
+  } else if (state.userNotFound) {
+    pageContent = (
         <div className="alert alert-danger text-center">
           <div className="alert-heading">
             <i className="fas fa-exclamation-triangle fa-3x"/>
@@ -35,8 +50,8 @@ export default function UserPage({match}) {
           <h5>User not found</h5>
         </div>
     );
+  } else {
+    pageContent = user && <ProfileCard user={user}/>;
   }
-  return <div data-testid="UserPage">
-    {user && (<ProfileCard user={user}/>)}
-  </div>;
+  return <div data-testid="UserPage">{pageContent}</div>;
 }
