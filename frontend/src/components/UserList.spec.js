@@ -207,5 +207,31 @@ describe("UserList", () => {
           () => queryByText("display1@user1"));
       expect(firstPage).toBeInTheDocument();
     });
+    it("displays error message when loading other page fails", async () => {
+      apiCalls.listUsers = jest.fn()
+      .mockResolvedValue(mockSuccessGetMultiPageLast)
+      .mockRejectedValue(mockFailGet);
+      const {queryByText} = setup();
+      const prevLink = await waitForElement(() => queryByText("< previous"));
+      fireEvent.click(prevLink);
+
+      const errorMessage = await waitForElement(
+          () => queryByText("User load failed"));
+      expect(errorMessage).toBeInTheDocument();
+    });
+    it("hide error message when successfully loading other page", async () => {
+      apiCalls.listUsers = jest.fn()
+      .mockResolvedValue(mockSuccessGetMultiPageLast)
+      .mockRejectedValue(mockFailGet)
+      .mockResolvedValue(mockSuccessGetMultiPageFirst);
+      const {queryByText} = setup();
+      const prevLink = await waitForElement(() => queryByText("< previous"));
+      // fireEvent.click(prevLink);
+      const errorMessage = await waitForElement(
+          () => queryByText("User load failed"));
+      expect(errorMessage).not.toBeInTheDocument();
+    });
   });
 });
+console.error = () => {
+};
