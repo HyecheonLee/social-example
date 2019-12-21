@@ -1,5 +1,9 @@
 import axios from "axios";
 
+export function getUser(username) {
+  return axios.get(`/api/1.0/users/${username}`);
+}
+
 export function listUsers(param = {page: 0, size: 3}) {
   return axios.get(
       `/api/1.0/users?page=${param.page || 0}&size=${param.size || 3}`);
