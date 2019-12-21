@@ -3,42 +3,55 @@ import * as apiCalls from "../api/apiCalls";
 import UserListItem from "./UserListItem";
 
 function UserList(props) {
-  const [page, setPage] = useState({
-    content: [],
-    number: 0,
-    size: 3
-  });
-  const [error, setError] = useState({
-    isError: false,
-    message: ""
-  });
-
+  const [state, setState] = useState(
+      {
+        page: {
+          content: [],
+          number: 0,
+          size: 3
+        },
+        error: {
+          isError: false,
+          message: ""
+        }
+      });
+  const {page, error} = state;
   const loadData = useCallback((requestedPage = 0) => {
     apiCalls
     .listUsers({page: requestedPage, size: page.size})
     .then(response => {
-      setPage({
-        ...response.data
+      setState({
+        page: {
+          ...response.data
+        },
+        error: {
+          isError: false,
+          message: ""
+        }
       });
-      setError({isError: false, message: ""})
-    }).catch(error => {
-      setError({
-        isError: true,
-        message: "User load failed"
-      })
+    })
+    .catch(error => {
+      setState(value => ({
+        page: {
+          ...value.page
+        },
+        error: {
+          isError: true,
+          message: "User load failed"
+        }
+      }))
     })
   }, [page.size]);
-
   useEffect(() => {
     loadData(page.number);
   }, []);
-
   const onClickNext = e => {
     loadData(page.number + 1);
   };
   const onClickPrev = (e) => {
     loadData(page.number - 1);
   };
+  console.log("xxx");
   return (
       <div className="card">
         <h3 className="card-title m-auto">Users</h3>
