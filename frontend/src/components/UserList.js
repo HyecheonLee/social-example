@@ -51,7 +51,6 @@ function UserList(props) {
   const onClickPrev = (e) => {
     loadData(page.number - 1);
   };
-  console.log("xxx");
   return (
       <div className="card">
         <h3 className="card-title m-auto">Users</h3>

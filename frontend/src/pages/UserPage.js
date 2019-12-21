@@ -25,7 +25,7 @@ export default function UserPage({match}) {
       setState({user: undefined});
     };
   }, [match.params.username]);
-  if (!state.userNotFound) {
+  if (state.userNotFound) {
     return (
         <div className="alert alert-danger text-center">
           <div className="alert-heading">
