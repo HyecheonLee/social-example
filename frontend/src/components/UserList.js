@@ -31,21 +31,14 @@ function UserList(props) {
 
   useEffect(() => {
     loadData(page.number);
-  }, [page.number, loadData]);
+  }, []);
 
-  const onClickNext = useCallback((e) => {
-    setPage(state => ({
-      ...state,
-      number: state.number + 1
-    }));
-  }, []);
-  const onClickPrev = useCallback((e) => {
-    console.log(page);
-    setPage(state => ({
-      ...state,
-      number: state.number - 1
-    }));
-  }, []);
+  const onClickNext = e => {
+    loadData(page.number + 1);
+  };
+  const onClickPrev = (e) => {
+    loadData(page.number - 1);
+  };
   return (
       <div className="card">
         <h3 className="card-title m-auto">Users</h3>

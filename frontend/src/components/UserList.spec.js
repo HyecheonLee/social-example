@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import UserList from "./UserList";
 import * as apiCalls from "../api/apiCalls";
+import {MemoryRouter} from "react-router-dom";
 
 apiCalls.listUsers = jest.fn().mockResolvedValue({
   data: {
@@ -17,7 +18,11 @@ apiCalls.listUsers = jest.fn().mockResolvedValue({
 });
 
 const setup = () => {
-  return render(<UserList/>);
+  return render(
+      <MemoryRouter>
+        <UserList/>
+      </MemoryRouter>
+  );
 };
 const mockedEmptySuccessResponse = {
   data: {
@@ -136,14 +141,13 @@ describe("UserList", () => {
           .fn()
           .mockResolvedValue(mockSuccessGetMultiPageFirst);
           const {queryByText} = setup();
-          const nextLink = await waitForElement(() =>
-              queryByText("next >")
-          );
+          const nextLink = await waitForElement(() => queryByText("next >"));
           expect(nextLink).toBeInTheDocument();
         });
     it("hides the next button when response has last value as true",
         async () => {
-          apiCalls.listUsers = jest.fn()
+          apiCalls.listUsers = jest
+          .fn()
           .mockResolvedValue(mockSuccessGetMultiPageLast);
           const {queryByText} = setup();
           const nextLink = await waitForElement(() => queryByText("next >"));
@@ -151,7 +155,8 @@ describe("UserList", () => {
         });
     it("displays the previous button when response has first value as false",
         async () => {
-          apiCalls.listUsers = jest.fn()
+          apiCalls.listUsers = jest
+          .fn()
           .mockResolvedValue(mockSuccessGetMultiPageLast);
           const {queryByText} = setup();
           const previous = await waitForElement(
@@ -160,13 +165,23 @@ describe("UserList", () => {
         });
     it("hides the previous button when response has first value as true",
         async () => {
-          apiCalls.listUsers = jest.fn()
+          apiCalls.listUsers = jest
+          .fn()
           .mockResolvedValue(mockSuccessGetMultiPageFirst);
           const {queryByText} = setup();
           const nextLink = await waitForElement(
               () => queryByText("< previous"));
           expect(nextLink).not.toBeInTheDocument();
         });
+    it("has link to UserPage", async () => {
+      apiCalls.listUsers = jest
+      .fn()
+      .mockResolvedValue(mockSuccessGetSinglePage);
+      const {queryByText, container} = setup();
+      await waitForElement(() => queryByText("display1@user1"));
+      const firstAnchor = container.querySelectorAll("a")[0];
+      expect(firstAnchor.getAttribute("href")).toBe("/user1");
+    });
   });
   describe("Lifecycle", function () {
     it("calls listUsers api when it is rendered", function () {
@@ -184,51 +199,63 @@ describe("UserList", () => {
       expect(apiCalls.listUsers).toHaveBeenCalledWith({page: 0, size: 3});
     });
   });
-  describe('Interactions', () => {
+  describe("Interactions", () => {
     it("loads next page when clicked to next button", async () => {
-      apiCalls.listUsers = jest.fn()
+      apiCalls.listUsers = jest
+      .fn()
       .mockResolvedValue(mockSuccessGetMultiPageFirst)
       .mockResolvedValue(mockSuccessGetMultiPageLast);
       const {queryByText} = setup();
       const nextLink = await waitForElement(() => queryByText("next >"));
       fireEvent.click(nextLink);
-      const secondPage = await waitForElement(
-          () => queryByText("display4@user4"));
+      const secondPage = await waitForElement(() =>
+          queryByText("display4@user4")
+      );
       expect(secondPage).toBeInTheDocument();
     });
     it("loads previous page when clicked to next button", async () => {
-      apiCalls.listUsers = jest.fn()
+      apiCalls.listUsers = jest
+      .fn()
       .mockResolvedValue(mockSuccessGetMultiPageLast)
       .mockResolvedValue(mockSuccessGetMultiPageFirst);
       const {queryByText} = setup();
       const prevLink = await waitForElement(() => queryByText("< previous"));
       fireEvent.click(prevLink);
-      const firstPage = await waitForElement(
-          () => queryByText("display1@user1"));
+      const firstPage = await waitForElement(() =>
+          queryByText("display1@user1")
+      );
       expect(firstPage).toBeInTheDocument();
     });
     it("displays error message when loading other page fails", async () => {
-      apiCalls.listUsers = jest.fn()
+      apiCalls.listUsers = jest
+      .fn()
       .mockResolvedValue(mockSuccessGetMultiPageLast)
       .mockRejectedValue(mockFailGet);
       const {queryByText} = setup();
       const prevLink = await waitForElement(() => queryByText("< previous"));
       fireEvent.click(prevLink);
 
-      const errorMessage = await waitForElement(
-          () => queryByText("User load failed"));
+      const errorMessage = await waitForElement(() =>
+          queryByText("User load failed")
+      );
       expect(errorMessage).toBeInTheDocument();
     });
-    it("hide error message when successfully loading other page", async () => {
-      apiCalls.listUsers = jest.fn()
-      .mockResolvedValue(mockSuccessGetMultiPageLast)
-      .mockRejectedValue(mockFailGet)
-      .mockResolvedValue(mockSuccessGetMultiPageFirst);
+    it("hides error message when successfully loading other page", async () => {
+      apiCalls.listUsers = jest
+      .fn()
+      .mockResolvedValueOnce(mockSuccessGetMultiPageLast)
+      .mockRejectedValueOnce(mockFailGet)
+      .mockResolvedValueOnce(mockSuccessGetMultiPageFirst);
       const {queryByText} = setup();
-      const prevLink = await waitForElement(() => queryByText("< previous"));
-      // fireEvent.click(prevLink);
-      const errorMessage = await waitForElement(
-          () => queryByText("User load failed"));
+      const previousLink = await waitForElement(() =>
+          queryByText("< previous")
+      );
+      fireEvent.click(previousLink);
+      await waitForElement(() => queryByText("User load failed"));
+      fireEvent.click(previousLink);
+      const errorMessage = await waitForElement(() =>
+          queryByText("User load failed")
+      );
       expect(errorMessage).not.toBeInTheDocument();
     });
   });
