@@ -1,5 +1,10 @@
 import React from "react";
-import {fireEvent, render, waitForElement} from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  waitForElement,
+  waitForDomChange
+} from "@testing-library/react";
 import ProfileCard from "./ProfileCard";
 import * as apiCalls from "../api/apiCalls";
 import {Provider} from "react-redux";
@@ -22,6 +27,13 @@ const mockSuccessUpdateUser = {
   }
 };
 
+const mockFailGetUser = {
+  response: {
+    data: {
+      message: "User not found"
+    }
+  }
+};
 const setUserOneLoggedInStorage = () => {
   localStorage.setItem(
       "hoax-auth",
@@ -148,6 +160,15 @@ describe("ProfileCard", () => {
     });
   });
   describe("interaction", () => {
+    const mockDelayedUpdateSuccess = () => {
+      return jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve(mockSuccessUpdateUser);
+          }, 300);
+        });
+      });
+    };
     it("calls updateUser api when clicking save", async () => {
       const {queryByText} = setupForEdit();
       apiCalls.updateUser = jest.fn().mockResolvedValue(mockSuccessUpdateUser);
@@ -228,5 +249,80 @@ describe("ProfileCard", () => {
 
           expect(lastSavedData).toHaveTextContent('display1-update@user1');
         });
+    it("displays spinner when there is updateUser api call", async () => {
+      const {queryByText} = await setupForEdit();
+      apiCalls.updateUser = mockDelayedUpdateSuccess();
+
+      const saveBtn = queryByText("Save");
+      fireEvent.click(saveBtn);
+      const spinner = queryByText("Loading...");
+      expect(spinner).toBeInTheDocument();
+    });
+    it("disables save button when there is updateUser api call", async () => {
+      const {queryByText} = await setupForEdit();
+      apiCalls.updateUser = mockDelayedUpdateSuccess();
+
+      const saveBtn = queryByText("Save");
+      fireEvent.click(saveBtn);
+      expect(saveBtn).toBeDisabled();
+    });
+    it("disables cancel button when there is updateUser api call", async () => {
+      const {queryByText} = await setupForEdit();
+      apiCalls.updateUser = mockDelayedUpdateSuccess();
+
+      const saveBtn = queryByText("Save");
+      fireEvent.click(saveBtn);
+
+      const cancelBtn = queryByText("Cancel");
+
+      expect(cancelBtn).toBeDisabled();
+    });
+    it("enables save button after updateUser api call success", async () => {
+      const {queryByText} = await setupForEdit();
+      apiCalls.updateUser = mockDelayedUpdateSuccess();
+
+      const saveBtn = queryByText("Save");
+      fireEvent.click(saveBtn);
+
+      const editButtonAfterClickingSave = await waitForElement(
+          () => queryByText("Edit"));
+
+      fireEvent.click(editButtonAfterClickingSave);
+
+      const saveButtonAfterSecondEdit = queryByText("Save");
+
+      expect(saveButtonAfterSecondEdit).not.toBeDisabled();
+
+    });
+    it("enables cancel button after updateUser api call success", async () => {
+      const {queryByText} = await setupForEdit();
+      apiCalls.updateUser = mockDelayedUpdateSuccess();
+
+      const saveBtn = queryByText("Save");
+      fireEvent.click(saveBtn);
+
+      const editButtonAfterClickingSave = await waitForElement(
+          () => queryByText("Edit"));
+
+      fireEvent.click(editButtonAfterClickingSave);
+
+      const cancelButtonAfterSecondEdit = queryByText("Cancel");
+
+      expect(cancelButtonAfterSecondEdit).not.toBeDisabled();
+
+    });
+    it("enables save button after updateUser api call fail", async () => {
+      const {queryByText, container} = await setupForEdit();
+      let displayInput = container.querySelector('input');
+      fireEvent.change(displayInput, {target: {value: 'display1-update'}});
+      apiCalls.updateUser = jest.fn().mockRejectedValue(mockFailGetUser);
+
+      const saveButton = queryByText('Save');
+      fireEvent.click(saveButton);
+
+      await waitForDomChange();
+
+      expect(saveButton).not.toBeDisabled();
+    });
   });
 });
