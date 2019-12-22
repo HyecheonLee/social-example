@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -362,6 +363,35 @@ public class UserControllerTest {
         assertThat(response.getBody().getMessage().contains("unknown-user")).isTrue();
     }
 
+    @Test
+    void putUser_whenUnauthorizedUserSendsTheRequest_receiveUnauthorized() {
+        final ResponseEntity<Object> response = putUser(123, null, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate("user1");
+        final ResponseEntity<Object> response = putUser(user.getId() + 1, null, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void putUser_whenUnauthorizedUserSendsTheRequest_receiveApiError() {
+        final ResponseEntity<ApiError> response = putUser(123, null, ApiError.class);
+        assertThat(response.getBody().getUrl()).contains("users/123");
+    }
+
+    @Test
+    void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate("user1");
+        final long anotherUserId = user.getId() + 1;
+        var response = putUser(anotherUserId, null, ApiError.class);
+        assertThat(response.getBody().getUrl()).contains("users/" + anotherUserId);
+    }
+
     private void authenticate(String username) {
         testRestTemplate.getRestTemplate().getInterceptors().add(new BasicAuthenticationInterceptor(username, "P4ssword"));
     }
@@ -382,5 +412,10 @@ public class UserControllerTest {
     public <T> ResponseEntity<T> getUser(String username, Class<T> responseType) {
         final String path = API_1_0_USERS + "/" + username;
         return testRestTemplate.getForEntity(path, responseType);
+    }
+
+    public <T> ResponseEntity<T> putUser(long id, HttpEntity<?> requestEntity, Class<T> responseType) {
+        final String path = API_1_0_USERS + "/" + id;
+        return testRestTemplate.exchange(path, HttpMethod.PUT, requestEntity, responseType);
     }
 }

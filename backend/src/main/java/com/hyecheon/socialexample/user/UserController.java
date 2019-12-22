@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,12 @@ public class UserController {
     @GetMapping("/api/1.0/users/{username}")
     public ResponseEntity<?> getUserByName(@PathVariable String username) {
         return new ResponseEntity<>(userService.findByUsername(username), HttpStatus.OK);
+    }
+
+    @PutMapping("/api/1.0/users/{id:[0-9]+}")
+    @PreAuthorize("#id eq principal.id")
+    public ResponseEntity<?> updateUser(@PathVariable Long id) {
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
