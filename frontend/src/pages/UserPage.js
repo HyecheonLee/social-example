@@ -34,6 +34,7 @@ export default function UserPage({match}) {
       setState({user: undefined});
     };
   }, [match.params.username]);
+
   let pageContent;
   if (state.isLoadingUser) {
     pageContent = (
@@ -44,7 +45,6 @@ export default function UserPage({match}) {
         </div>
     );
   } else if (state.userNotFound) {
-
     pageContent = (
         <div className="alert alert-danger text-center">
           <div className="alert-heading">
@@ -55,7 +55,11 @@ export default function UserPage({match}) {
     );
   } else {
     let isEditable = auth.username === match.params.username;
-    pageContent = user && <ProfileCard user={user} isEditable={isEditable}/>;
+    pageContent = user &&
+        <ProfileCard
+            user={user}
+            isEditable={isEditable}
+        />;
   }
   return <div data-testid="UserPage">{pageContent}</div>;
 }
