@@ -1,5 +1,5 @@
 import React from "react";
-import {render} from "@testing-library/react";
+import {fireEvent, render} from "@testing-library/react";
 import ProfileCard from './ProfileCard';
 
 const user = {
@@ -48,50 +48,66 @@ describe('ProfileCard', () => {
         });
     it("displays displayName input when inEditMode property set as true",
         () => {
-          const {container} = render(<ProfileCard user={user}
-                                                  inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
+          const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
           const displayInput = container.querySelector("input");
           expect(displayInput).toBeInTheDocument();
         });
     it("displays the current displayName in input in edit mode",
         () => {
-          const {container} = render(<ProfileCard user={user}
-                                                  inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
+          const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
+
           const displayInput = container.querySelector("input");
           expect(displayInput.value).toBe(user.displayName);
         });
     it("hides the displayName@username in edit mode",
         () => {
-          const {queryByText} = render(<ProfileCard user={user}
-                                                    inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
+          const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
+
           const userInfo = queryByText("display1@user1");
           expect(userInfo).not.toBeInTheDocument();
         });
     it("displays label for displayName in edit mode",
         () => {
-          const {container} = render(<ProfileCard user={user}
-                                                  inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
+          const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
+
           const label = container.querySelector("label");
           expect(label).toHaveTextContent("Change Display Name for user1");
         });
     it("hides the edit button in edit mode and isEditable provided as true",
         () => {
-          const {queryByText} = render(<ProfileCard user={user}
-                                                    inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
           const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
           expect(editButton).not.toBeInTheDocument();
         });
     it("displays Save button in edit mode",
         () => {
-          const {queryByText} = render(<ProfileCard user={user}
-                                                    inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
+          const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
           const saveButton = queryByText("Save");
           expect(saveButton).toBeInTheDocument();
         });
     it("displays Cancel button in edit mode",
         () => {
-          const {queryByText} = render(<ProfileCard user={user}
-                                                    inEditMode={true}/>);
+          const {container, queryByText} = render(<ProfileCard user={user}
+                                                               isEditable={true}/>);
+          const editButton = queryByText("Edit");
+          fireEvent.click(editButton);
           const saveButton = queryByText("Cancel");
           expect(saveButton).toBeInTheDocument();
         });
