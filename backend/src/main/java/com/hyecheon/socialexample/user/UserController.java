@@ -3,6 +3,7 @@ package com.hyecheon.socialexample.user;
 import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.CurrentUser;
 import com.hyecheon.socialexample.shared.GenericResponse;
+import com.hyecheon.socialexample.user.vm.UserUpdateVM;
 import com.hyecheon.socialexample.user.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +46,10 @@ public class UserController {
     }
 
     @PutMapping("/api/1.0/users/{id:[0-9]+}")
-    @PreAuthorize("#id eq principal.id")
-    public ResponseEntity<?> updateUser(@PathVariable Long id) {
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PreAuthorize("#id == principal.id")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserUpdateVM userUpdate) {
+        final User updatedUser = userService.update(id, userUpdate);
+        return new ResponseEntity<>(new UserVM(updatedUser), HttpStatus.OK);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})

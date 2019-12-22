@@ -1,6 +1,7 @@
 package com.hyecheon.socialexample.user;
 
 import com.hyecheon.socialexample.error.NotFoundException;
+import com.hyecheon.socialexample.user.vm.UserUpdateVM;
 import com.hyecheon.socialexample.user.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -8,8 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -35,4 +38,10 @@ public class UserService {
     public UserVM findByUsername(String username) {
         return userRepository.findByUsername(username).map(UserVM::new).orElseThrow(() -> new NotFoundException(username + " not found"));
     }
+
+    public User update(Long id, UserUpdateVM userUpdate) {
+        final User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("user id " + id + " not found"));
+        return userUpdate.updatedUser(user);
+    }
 }
+

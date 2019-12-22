@@ -6,6 +6,9 @@ import com.hyecheon.socialexample.user.TestPage;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
 import com.hyecheon.socialexample.user.UserService;
+import com.hyecheon.socialexample.user.vm.UserUpdateVM;
+import com.hyecheon.socialexample.user.vm.UserVM;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +48,11 @@ public class UserControllerTest {
 
     @BeforeEach
     void cleanup() {
+        userRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
         userRepository.deleteAll();
     }
 
@@ -390,6 +398,49 @@ public class UserControllerTest {
         final long anotherUserId = user.getId() + 1;
         var response = putUser(anotherUserId, null, ApiError.class);
         assertThat(response.getBody().getUrl()).contains("users/" + anotherUserId);
+    }
+
+    @Test
+    void putUser_whenValidRequestBodyFromAuthorizedUser_receiveOk() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate("user1");
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+
+        var requestEntity = new HttpEntity<>(updateUser);
+        var response = putUser(user.getId(), requestEntity, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void putUser_whenValidRequestBodyFromAuthorizedUser_displayNameUpdated() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate("user1");
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+
+        var requestEntity = new HttpEntity<>(updateUser);
+        putUser(user.getId(), requestEntity, Object.class);
+
+        final User userInDB = userRepository.findByUsername("user1").get();
+        assertThat(userInDB.getDisplayName()).isEqualTo(updateUser.getDisplayName());
+    }
+
+    @Test
+    void putUser_whenValidRequestBodyFromAuthorizedUser_receiveUserVMWithUpdatedDisplayName() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate("user1");
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+
+        var requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
+
+        assertThat(response.getBody().getDisplayName()).isEqualTo(updateUser.getDisplayName());
+    }
+
+
+    private UserUpdateVM createValidUserUpdateVM() {
+        final UserUpdateVM updateUser = new UserUpdateVM();
+        updateUser.setDisplayName("newDisplayName");
+        return updateUser;
     }
 
     private void authenticate(String username) {
