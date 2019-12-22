@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from "react";
 import * as apiCalls from "../api/apiCalls";
 import ProfileCard from "../components/ProfileCard";
+import {useSelector} from "react-redux";
 
 export default function UserPage({match}) {
+  const auth = useSelector(state => ({...state.auth}));
   const [state, setState] = useState({
     user: undefined,
     userNotFound: false,
@@ -42,6 +44,7 @@ export default function UserPage({match}) {
         </div>
     );
   } else if (state.userNotFound) {
+
     pageContent = (
         <div className="alert alert-danger text-center">
           <div className="alert-heading">
@@ -51,7 +54,8 @@ export default function UserPage({match}) {
         </div>
     );
   } else {
-    pageContent = user && <ProfileCard user={user}/>;
+    let isEditable = auth.username === match.params.username;
+    pageContent = user && <ProfileCard user={user} isEditable={isEditable}/>;
   }
   return <div data-testid="UserPage">{pageContent}</div>;
 }

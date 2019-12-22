@@ -3,7 +3,7 @@ import defaultPicture from '../assets/profile.png';
 import {Link} from "react-router-dom";
 import ProfileImageWithDefault from "./ProfileImageWithDefault";
 
-function ProfileCard({user}) {
+function ProfileCard({user, isEditable}) {
   return (
       <div className="card">
         <div className="card-header text-center">
@@ -13,7 +13,12 @@ function ProfileCard({user}) {
           />
         </div>
         <div className="card-body text-center">
-          <h4>{`${user.displayName}@${user.username}`}</h4></div>
+          <h4>{`${user.displayName}@${user.username}`}</h4>
+          {isEditable && <button
+              className="btn btn-outline-success">
+            <i className="fas fa-user-edit"/> Edit
+          </button>}
+        </div>
       </div>
   );
 }
