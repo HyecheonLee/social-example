@@ -99,6 +99,7 @@ function ProfileCard({user}) {
                     value={userProfile.displayName}
                     label={`Change Display Name for ${userProfile.username}`}
                 />
+                <input className="form-control-file mb-2" type={"file"}/>
               </div>
           )}
           {isEditable && !inEditMode && (

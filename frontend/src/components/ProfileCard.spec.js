@@ -324,5 +324,11 @@ describe("ProfileCard", () => {
 
       expect(saveButton).not.toBeDisabled();
     });
+    it("display file input when inEditMode property set as true", async () => {
+      const {container} = await setupForEdit();
+      const inputs = container.querySelectorAll("input");
+      const uploadInput = inputs[1];
+      expect(uploadInput.type).toBe("file");
+    });
   });
 });
