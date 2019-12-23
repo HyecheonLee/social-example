@@ -1,5 +1,6 @@
 package com.hyecheon.socialexample;
 
+import com.hyecheon.socialexample.configuration.AppConfiguration;
 import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.GenericResponse;
 import com.hyecheon.socialexample.user.TestPage;
@@ -28,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Base64Utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -49,6 +51,9 @@ public class UserControllerTest {
     UserRepository userRepository;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    AppConfiguration appConfiguration;
 
     @BeforeEach
     void cleanup() {
@@ -444,19 +449,46 @@ public class UserControllerTest {
     void putUser_withValidRequestBodyWithSupportedImageFromAuthorizedUser_receiveUserVMWithRandomImageName() throws IOException {
         final User user = userService.save(createValidUser("user1"));
         authenticate("user1");
-
-        final ClassPathResource imageResource = new ClassPathResource("profile.png");
-
         final UserUpdateVM updateUser = createValidUserUpdateVM();
-        byte[] imageArr = FileUtils.readFileToByteArray(imageResource.getFile());
-        final String imageString = Base64Utils.encodeToString(imageArr);
+        final String imageString = readFileToBase64("profile.png");
         updateUser.setImage(imageString);
-
 
         var requestEntity = new HttpEntity<>(updateUser);
         final ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
 
         assertThat(response.getBody().getImage()).isNotEqualTo("profile-image.png");
+    }
+
+    @Test
+    void putUser_withValidRequestBodyWithSupportedImageFromAuthorizedUser_imageIsStoredUnderProfileFolder() throws IOException {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate("user1");
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+        final String imageString = readFileToBase64("profile.png");
+        updateUser.setImage(imageString);
+
+        var requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
+
+        final String storedImageName = response.getBody().getImage();
+        final String profilePicturePath = appConfiguration.getFullProfileImagePath() + "/" + storedImageName;
+
+        final File storedImage = new File(profilePicturePath);
+
+        assertThat(storedImage.exists()).isTrue();
+    }
+
+    @AfterEach
+    void clearDir() throws IOException {
+        FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagePath()));
+        FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
+    }
+
+    private String readFileToBase64(String fileName) throws IOException {
+        final ClassPathResource imageResource = new ClassPathResource(fileName);
+        final byte[] imageArr = FileUtils.readFileToByteArray(imageResource.getFile());
+        final String imageString = Base64Utils.encodeToString(imageArr);
+        return imageString;
     }
 
     private UserUpdateVM createValidUserUpdateVM() {
