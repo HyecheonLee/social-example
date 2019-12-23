@@ -13,6 +13,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -84,6 +86,20 @@ public class StaticResourceTest {
     void getStaticFile_whenImageDoesNotExist_receiveNotFound() throws Exception {
         mockMvc.perform(get("/images/" + appConfiguration.getAttachmentsFolderPath() + "/there-is-no-such-image.png"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getStaticFile_whenImageExistInAttachmentFolder_receiveOkWithCacheHeaders() throws Exception {
+        String fileName = "profile-picture.png";
+        final File source = new ClassPathResource("profile.png").getFile();
+
+        final File target = new File(appConfiguration.getFullAttachmentsPath() + "/" + fileName);
+        FileUtils.copyFile(source, target);
+
+        final MvcResult result = mockMvc.perform(get("/images/" + appConfiguration.getAttachmentsFolderPath() + "/" + fileName)).andExpect(status().isOk()).andReturn();
+
+        String cacheControl = result.getResponse().getHeaderValue("Cache-Control").toString();
+        assertThat(cacheControl).containsIgnoringCase("max-age=31536000");
     }
 
     @AfterEach
