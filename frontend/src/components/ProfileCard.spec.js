@@ -59,9 +59,11 @@ const setUserOneLoggedInStorage = () => {
 };
 
 describe("ProfileCard", () => {
+  let store;
+
   function setupForEdit() {
     setUserOneLoggedInStorage();
-    const store = configureStore(false);
+    store = configureStore(false);
     const path = "/user1";
     const rendered = render(
         <Provider store={store}>
@@ -79,7 +81,7 @@ describe("ProfileCard", () => {
   }
 
   function setup(user = user) {
-    const store = configureStore(false);
+    store = configureStore(false);
     const path = "/user1";
     const rendered = render(
         <Provider store={store}>
@@ -480,6 +482,38 @@ describe("ProfileCard", () => {
       const errorMessage = queryByText(
           "It must have minimum 4 and maximum 255 characters");
       expect(errorMessage).not.toBeInTheDocument();
+    });
+    it("updates redux state after updateUser api call success", async () => {
+      const {queryByText, container} = await setupForEdit();
+      const inputs = container.querySelector("input");
+      fireEvent.change(inputs, {target: {value: "display1-update"}});
+      apiCalls.updateUser = jest.fn().mockResolvedValue(mockSuccessUpdateUser);
+
+      const saveButton = queryByText("Save");
+      fireEvent.click(saveButton);
+      await waitForDomChange();
+
+      const {auth} = store.getState();
+      expect(auth.displayName).toBe(
+          mockSuccessUpdateUser.data.displayName);
+      expect(auth.image).toBe(
+          mockSuccessUpdateUser.data.image);
+    });
+    it("updates localStorage after updateUser api call success", async () => {
+      const {queryByText, container} = await setupForEdit();
+      const inputs = container.querySelector("input");
+      fireEvent.change(inputs, {target: {value: "display1-update"}});
+      apiCalls.updateUser = jest.fn().mockResolvedValue(mockSuccessUpdateUser);
+
+      const saveButton = queryByText("Save");
+      fireEvent.click(saveButton);
+      await waitForDomChange();
+
+      const auth = JSON.parse(localStorage.getItem("hoax-auth"));
+      expect(auth.displayName).toBe(
+          mockSuccessUpdateUser.data.displayName);
+      expect(auth.image).toBe(
+          mockSuccessUpdateUser.data.image);
     });
   });
 });

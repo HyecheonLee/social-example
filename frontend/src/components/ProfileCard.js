@@ -3,12 +3,14 @@ import {useParams} from "react-router-dom";
 import ProfileImageWithDefault from "./ProfileImageWithDefault";
 import Input from "./Input";
 import * as api from "../api/apiCalls";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import ButtonWithProgress from "./ButtonWithProgress";
+import {updateSuccess} from "../redux/auth";
 
 function ProfileCard({user}) {
   const auth = useSelector(state => ({...state.auth}));
   const {username} = useParams();
+  const dispatch = useDispatch();
   const [state, setState] = useState({
     userProfile: {
       username: user.username,
@@ -81,6 +83,9 @@ function ProfileCard({user}) {
         },
         pendingUpdateCall: false
       }));
+      return response.data;
+    }).then(value => {
+      dispatch(updateSuccess(value));
     })
     .catch(error => {
       let errors = {};

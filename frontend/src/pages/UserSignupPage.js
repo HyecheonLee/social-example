@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import Input from "../components/Input";
 import ButtonWithProgress from "../components/ButtonWithProgress";
-import { loginSuccess, signupHandler } from "../redux/auth";
-import { useDispatch } from "react-redux";
+import {signupHandler} from "../redux/auth";
+import {useDispatch} from "react-redux";
 
 function UserSignupPage({ history }) {
   let [state, setState] = useState({
