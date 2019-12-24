@@ -1,5 +1,5 @@
 import logo from "../assets/hoaxify-logo.png";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {logout} from "../redux/auth";
@@ -10,20 +10,33 @@ function TopBar() {
   const [state, setState] = useState({toggle: false});
   const auth = useSelector(state => ({...state.auth}));
   const dispatch = useDispatch();
+  // const onClickTracker = (e) => {
+  //   setState(value => ({toggle: false}));
+  //   /*if (this.actionArea && this.actionArea.contains(e.target)) {
+  //     setState(value => ({toggle: false}))
+  //   }*/
+  // };
+  // useEffect(() => {
+  //   document.addEventListener("click", onClickTracker);
+  //   return () => {
+  //     document.removeEventListener("click", onClickTracker);
+  //   }
+  // }, []);
 
   const onClickLogout = () => {
+    setState(value => ({toggle: false}));
     dispatch(logout());
   };
   let links;
-  console.log(state);
   if (auth.isLoggedIn) {
     links = (
         <ul className="nav navbar-nav ml-auto">
-          <li className="nav-item dropdown"
-              onClick={e => {
-                setState(value => ({toggle: !value.toggle}))
-              }}>
-            <div className={"d-flex"} style={{cursor: "pointer"}}>
+          <li className="nav-item dropdown">
+            <div className={"d-flex"} style={{cursor: "pointer"}}
+                 onClick={e => {
+                   setState(value => ({toggle: !value.toggle}))
+                 }}
+            >
               <ProfileImageWithDefault
                   image={auth.image}
                   className="rounded-circle m-auto"
@@ -32,9 +45,14 @@ function TopBar() {
               <span
                   className={"nav-link dropdown-toggle"}>{auth.displayName}</span>
             </div>
-            <div className={classNames("p-0", "shadow", "dropdown-menu",
-                {"show": state.toggle})}>
-              <Link to={`/${auth.username}`} className="dropdown-item">
+            <div
+                className={classNames("p-0", "shadow", "dropdown-menu",
+                    {"show": state.toggle})}
+                data-testid={"drop-down-menu"}
+            >
+              <Link to={`/${auth.username}`} className="dropdown-item"
+                    onClick={(e) => setState(value => ({toggle: false}))}
+              >
                 <i className={"fas fa-user text-info"}/>My Profile
               </Link>
               <span

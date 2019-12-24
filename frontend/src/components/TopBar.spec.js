@@ -6,6 +6,8 @@ import {createStore} from "redux";
 import {Provider} from "react-redux";
 import rootReducer from "../redux";
 
+import {loginSuccess, signupHandler} from "../redux/auth";
+
 const loggedInState = {
   id: 1,
   username: "user1",
@@ -22,9 +24,9 @@ const defaultState = {
   password: "",
   isLoggedIn: false
 };
-
+let store;
 const setup = (state = defaultState) => {
-  const store = createStore(rootReducer, {auth: {...state}});
+  store = createStore(rootReducer, {auth: {...state}});
   return render(
       <Provider store={store}>
         <MemoryRouter>
@@ -85,6 +87,42 @@ describe("TopBar", () => {
       fireEvent.click(logoutLink);
       const loginLink = queryByText("Login");
       expect(loginLink).toBeInTheDocument();
+    });
+    it("adds show class to drop down menu when clicking username", () => {
+      const {queryByText, queryByTestId} = setup(loggedInState);
+      const displayName = queryByText("display1");
+      fireEvent.click(displayName);
+      const dropDownMenu = queryByTestId("drop-down-menu");
+      expect(dropDownMenu).toHaveClass("p-0 shadow dropdown-menu show")
+    });
+    it("removes show class to drop down menu when clicking app log", () => {
+      const {queryByText, queryByTestId, container} = setup(loggedInState);
+      const displayName = queryByText("display1");
+      fireEvent.click(displayName);
+
+      const logo = container.querySelector("img");
+      fireEvent.click(logo);
+
+      const dropDownMenu = queryByTestId("drop-down-menu");
+      expect(dropDownMenu).toHaveClass("p-0 shadow dropdown-menu")
+    });
+    it("removes show class to drop down menu when clicking logout", () => {
+      const {queryByText, queryByTestId} = setup(loggedInState);
+      const displayName = queryByText("display1");
+      fireEvent.click(displayName);
+      fireEvent.click(queryByText("Logout"));
+
+      store.dispatch(loginSuccess(loggedInState));
+      const dropDownMenu = queryByTestId("drop-down-menu");
+      expect(dropDownMenu).toHaveClass("p-0 shadow dropdown-menu")
+    });
+    it("removes show class to drop down menu when clicking My Profile", () => {
+      const {queryByText, queryByTestId} = setup(loggedInState);
+      const displayName = queryByText("display1");
+      fireEvent.click(displayName);
+      fireEvent.click(queryByText("My Profile"));
+      const dropDownMenu = queryByTestId("drop-down-menu");
+      expect(dropDownMenu).toHaveClass("p-0 shadow dropdown-menu")
     });
   });
 
