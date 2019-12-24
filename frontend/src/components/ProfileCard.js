@@ -128,11 +128,14 @@ function ProfileCard({user}) {
                     hasError={state.errors && state.errors.displayName && true}
                     error={state.errors && state.errors.displayName}
                 />
-                <input
-                    className="form-control-file mt-2"
-                    type={"file"}
-                    onChange={onFileSelectHandler}
-                />
+                <div className={"mt-2"}>
+                  <Input
+                      type={"file"}
+                      onChange={onFileSelectHandler}
+                      hasError={state.errors.image && true}
+                      error={state.errors.image}
+                  />
+                </div>
               </div>
           )}
           {isEditable && !inEditMode && (

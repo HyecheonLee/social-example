@@ -418,5 +418,18 @@ describe("ProfileCard", () => {
               "It must have minimum 4 and maximum 255 characters");
           expect(errorMessage).toBeInTheDocument();
         });
+    it("shows validation error for file when update api fails", async () => {
+      const {queryByText} = await setupForEdit();
+      apiCalls.updateUser = jest.fn().mockRejectedValue(
+          mockFailUpdateUser);
+
+      const saveButton = queryByText("Save");
+      fireEvent.click(saveButton);
+      await waitForDomChange();
+
+      const errorMessage = queryByText(
+          "PNG 와 JPG 파일만 허용 됩니다.");
+      expect(errorMessage).toBeInTheDocument();
+    });
   });
 });
