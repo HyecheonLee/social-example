@@ -478,6 +478,43 @@ public class UserControllerTest {
         assertThat(storedImage.exists()).isTrue();
     }
 
+    @Test
+    void putUser_withInvalidRequestBodyWithNullDisplayNameFromAuthorizedUser_receiveBadRequest() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = new UserUpdateVM();
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void putUser_withInvalidRequestBodyWithLessThanMinSizeDisplayNameFromAuthorizedUser_receiveBadRequest() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = new UserUpdateVM();
+        updateUser.setDisplayName("abc");
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void putUser_withInvalidRequestBodyWithMoreThanMaxSizeDisplayNameFromAuthorizedUser_receiveBadRequest() {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = new UserUpdateVM();
+        final String valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(String::valueOf).collect(Collectors.joining(""));
+        updateUser.setDisplayName(valueOf256Chars);
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+
     @AfterEach
     void clearDir() throws IOException {
         FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagePath()));

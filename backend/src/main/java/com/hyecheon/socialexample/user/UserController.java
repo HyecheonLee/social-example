@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,7 @@ public class UserController {
 
     @PutMapping("/api/1.0/users/{id:[0-9]+}")
     @PreAuthorize("#id == principal.id")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserUpdateVM userUpdate) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateVM userUpdate) {
         final User updatedUser = userService.update(id, userUpdate);
         return new ResponseEntity<>(new UserVM(updatedUser), HttpStatus.OK);
     }
