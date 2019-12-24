@@ -20,6 +20,7 @@ const mockFailGetUser = {
     }
   }
 };
+
 const match = {
   params: {
     username: "user1"

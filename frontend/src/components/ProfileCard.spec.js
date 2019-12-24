@@ -34,6 +34,16 @@ const mockFailGetUser = {
     }
   }
 };
+const mockFailUpdateUser = {
+  response: {
+    data: {
+      validationErrors: {
+        displayName: "It must have minimum 4 and maximum 255 characters",
+        image: "PNG 와 JPG 파일만 허용 됩니다."
+      }
+    }
+  }
+};
 const setUserOneLoggedInStorage = () => {
   localStorage.setItem(
       "hoax-auth",
@@ -208,8 +218,9 @@ describe("ProfileCard", () => {
               mockSuccessUpdateUser);
           const saveButton = queryByText("Save");
           fireEvent.click(saveButton);
-          const updateDisplayName = await waitForElement(
-              () => queryByText("display1-update@user1"));
+          const updateDisplayName = await waitForElement(() =>
+              queryByText("display1-update@user1")
+          );
           expect(updateDisplayName).toBeInTheDocument();
         });
     it("returns to original displayName after its changed in edit mode but cancelled",
@@ -222,32 +233,32 @@ describe("ProfileCard", () => {
           const displayName = queryByText("display1@user1");
           expect(displayName).toBeInTheDocument();
         });
-    it('returns to last updated displayName when display name is changed for another time but cancelled',
+    it("returns to last updated displayName when display name is changed for another time but cancelled",
         async () => {
           const {queryByText, container} = await setupForEdit();
-          let displayInput = container.querySelector('input');
-          fireEvent.change(displayInput, {target: {value: 'display1-update'}});
+          let displayInput = container.querySelector("input");
+          fireEvent.change(displayInput, {target: {value: "display1-update"}});
           apiCalls.updateUser = jest.fn().mockResolvedValue(
               mockSuccessUpdateUser);
 
-          const saveButton = queryByText('Save');
+          const saveButton = queryByText("Save");
           fireEvent.click(saveButton);
 
           const editButtonAfterClickingSave = await waitForElement(() =>
-              queryByText('Edit')
+              queryByText("Edit")
           );
           fireEvent.click(editButtonAfterClickingSave);
 
-          displayInput = container.querySelector('input');
+          displayInput = container.querySelector("input");
           fireEvent.change(displayInput, {
-            target: {value: 'display1-update-second-time'}
+            target: {value: "display1-update-second-time"}
           });
-          const cancelButton = queryByText('Cancel');
+          const cancelButton = queryByText("Cancel");
           fireEvent.click(cancelButton);
 
-          const lastSavedData = container.querySelector('h4');
+          const lastSavedData = container.querySelector("h4");
 
-          expect(lastSavedData).toHaveTextContent('display1-update@user1');
+          expect(lastSavedData).toHaveTextContent("display1-update@user1");
         });
     it("displays spinner when there is updateUser api call", async () => {
       const {queryByText} = await setupForEdit();
@@ -284,15 +295,15 @@ describe("ProfileCard", () => {
       const saveBtn = queryByText("Save");
       fireEvent.click(saveBtn);
 
-      const editButtonAfterClickingSave = await waitForElement(
-          () => queryByText("Edit"));
+      const editButtonAfterClickingSave = await waitForElement(() =>
+          queryByText("Edit")
+      );
 
       fireEvent.click(editButtonAfterClickingSave);
 
       const saveButtonAfterSecondEdit = queryByText("Save");
 
       expect(saveButtonAfterSecondEdit).not.toBeDisabled();
-
     });
     it("enables cancel button after updateUser api call success", async () => {
       const {queryByText} = await setupForEdit();
@@ -301,23 +312,23 @@ describe("ProfileCard", () => {
       const saveBtn = queryByText("Save");
       fireEvent.click(saveBtn);
 
-      const editButtonAfterClickingSave = await waitForElement(
-          () => queryByText("Edit"));
+      const editButtonAfterClickingSave = await waitForElement(() =>
+          queryByText("Edit")
+      );
 
       fireEvent.click(editButtonAfterClickingSave);
 
       const cancelButtonAfterSecondEdit = queryByText("Cancel");
 
       expect(cancelButtonAfterSecondEdit).not.toBeDisabled();
-
     });
     it("enables save button after updateUser api call fail", async () => {
       const {queryByText, container} = await setupForEdit();
-      let displayInput = container.querySelector('input');
-      fireEvent.change(displayInput, {target: {value: 'display1-update'}});
+      let displayInput = container.querySelector("input");
+      fireEvent.change(displayInput, {target: {value: "display1-update"}});
       apiCalls.updateUser = jest.fn().mockRejectedValue(mockFailGetUser);
 
-      const saveButton = queryByText('Save');
+      const saveButton = queryByText("Save");
       fireEvent.click(saveButton);
 
       await waitForDomChange();
@@ -334,24 +345,25 @@ describe("ProfileCard", () => {
       const {container} = await setupForEdit();
       const inputs = container.querySelectorAll("input");
       const uploadInput = inputs[1];
-      const file = new File(["dummy content"], "example.png",
-          {type: "image/png"});
+      const file = new File(["dummy content"], "example.png", {
+        type: "image/png"
+      });
 
       fireEvent.change(uploadInput, {target: {files: [file]}});
 
       await waitForDomChange();
 
       const image = container.querySelector("img");
-      expect(image.src).toContain("data:image/png;base64")
-
+      expect(image.src).toContain("data:image/png;base64");
     });
     it("returns back to the original image even the new image is added to upload box but canceled",
         async () => {
           const {queryByText, container} = await setupForEdit();
           const inputs = container.querySelectorAll("input");
           const uploadInput = inputs[1];
-          const file = new File(["dummy content"], "example.png",
-              {type: "image/png"});
+          const file = new File(["dummy content"], "example.png", {
+            type: "image/png"
+          });
 
           fireEvent.change(uploadInput, {target: {files: [file]}});
 
@@ -360,26 +372,27 @@ describe("ProfileCard", () => {
           fireEvent.click(cancelButton);
 
           const image = container.querySelector("img");
-          expect(image.src).toContain("/images/profile/profile1.png")
-
+          expect(image.src).toContain("/images/profile/profile1.png");
         });
     it("does not throw error after file not selected", async () => {
       const {container} = await setupForEdit();
       const inputs = container.querySelectorAll("input");
       const uploadInput = inputs[1];
-      expect(() => fireEvent.change(uploadInput,
-          {target: {files: []}})).not.toThrow()
+      expect(() =>
+          fireEvent.change(uploadInput, {target: {files: []}})
+      ).not.toThrow();
     });
     it("calls updateUser api with request body having new image without data:image/png;base64",
         async () => {
-          const {queryByText, container} = await setupForEdit()
+          const {queryByText, container} = await setupForEdit();
           apiCalls.updateUser = jest.fn().mockResolvedValue(
               mockSuccessUpdateUser);
 
           const inputs = container.querySelectorAll("input");
           const uploadInput = inputs[1];
-          const file = new File(["dummy content"], "example.png",
-              {type: "image/png"});
+          const file = new File(["dummy content"], "example.png", {
+            type: "image/png"
+          });
 
           fireEvent.change(uploadInput, {target: {files: [file]}});
 
@@ -390,6 +403,20 @@ describe("ProfileCard", () => {
           const requestBody = apiCalls.updateUser.mock.calls[0][1];
 
           expect(requestBody.image).not.toContain("data:image/png;base64");
+        });
+    it("displays validation error for displayName when update api fails",
+        async () => {
+          const {queryByText} = await setupForEdit();
+          apiCalls.updateUser = jest.fn().mockRejectedValue(
+              mockFailUpdateUser);
+
+          const saveButton = queryByText("Save");
+          fireEvent.click(saveButton);
+          await waitForDomChange();
+
+          const errorMessage = queryByText(
+              "It must have minimum 4 and maximum 255 characters");
+          expect(errorMessage).toBeInTheDocument();
         });
   });
 });

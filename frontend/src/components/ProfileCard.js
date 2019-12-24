@@ -21,7 +21,8 @@ function ProfileCard({user}) {
     pendingUpdateCall: false,
     isEditable: auth.username === username,
     inEditMode: false,
-    loadedImage: undefined
+    loadedImage: undefined,
+    errors: {}
   });
   const {userProfile, inEditMode, isEditable} = state;
   const onChangeHandler = e => {
@@ -31,7 +32,8 @@ function ProfileCard({user}) {
       userProfile: {
         ...preValue.userProfile,
         [name]: value
-      }
+      },
+      errors: {}
     }));
   };
   const onFileSelectHandler = e => {
@@ -77,9 +79,14 @@ function ProfileCard({user}) {
       }));
     })
     .catch(error => {
+      let errors = {};
+      if (error.response.data.validationErrors) {
+        errors = error.response.data.validationErrors;
+      }
       setState(value => ({
         ...value,
-        pendingUpdateCall: false
+        pendingUpdateCall: false,
+        errors
       }));
     });
   };
@@ -118,6 +125,8 @@ function ProfileCard({user}) {
                     onChange={onChangeHandler}
                     value={userProfile.displayName}
                     label={`Change Display Name for ${userProfile.username}`}
+                    hasError={state.errors && state.errors.displayName && true}
+                    error={state.errors && state.errors.displayName}
                 />
                 <input
                     className="form-control-file mt-2"
