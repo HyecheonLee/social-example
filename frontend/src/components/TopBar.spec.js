@@ -24,51 +24,63 @@ const defaultState = {
 };
 
 const setup = (state = defaultState) => {
-  const store = createStore(rootReducer, { auth: { ...state } });
+  const store = createStore(rootReducer, {auth: {...state}});
   return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <TopBar />
-      </MemoryRouter>
-    </Provider>
+      <Provider store={store}>
+        <MemoryRouter>
+          <TopBar/>
+        </MemoryRouter>
+      </Provider>
   );
 };
 describe("TopBar", () => {
   describe("Layout", () => {
     it("has application logo ", () => {
-      const { container } = setup();
+      const {container} = setup();
       const image = container.querySelector("img");
       expect(image.src).toContain("hoaxify-logo.png");
     });
     it("has link to home from logo", () => {
-      const { container } = setup();
+      const {container} = setup();
       const image = container.querySelector("img");
       expect(image.parentElement.getAttribute("href")).toBe("/");
     });
     it("has link to signup", () => {
-      const { queryByText } = setup();
+      const {queryByText} = setup();
       const signupLink = queryByText("Sign Up");
       expect(signupLink.getAttribute("href")).toBe("/signup");
     });
     it("has link to login", () => {
-      const { queryByText } = setup();
+      const {queryByText} = setup();
       const signupLink = queryByText("Login");
       expect(signupLink.getAttribute("href")).toBe("/login");
     });
     it("has link to logout when user logged in", () => {
-      const { queryByText } = setup(loggedInState);
+      const {queryByText} = setup(loggedInState);
       const logoutLink = queryByText("Logout");
       expect(logoutLink).toBeInTheDocument();
     });
     it("has link to user profile when user logged in", () => {
-      const { queryByText } = setup(loggedInState);
+      const {queryByText} = setup(loggedInState);
       const profileLink = queryByText("My Profile");
       expect(profileLink.getAttribute("href")).toBe("/user1");
+    });
+    it("displays the displayName when user logged in", () => {
+      const {queryByText} = setup(loggedInState);
+      const displayName = queryByText("display1");
+      expect(displayName).toBeInTheDocument();
+    });
+    it("displays users image when user logged in", () => {
+      const {container} = setup(loggedInState);
+      const images = container.querySelectorAll("img");
+      const userImage = images[1];
+      expect(userImage.src).toContain("/images/profile/" + loggedInState.image);
+
     });
   });
   describe("Interactions", () => {
     it("displays the login and signup links when user clicks logout", () => {
-      const { queryByText } = setup(loggedInState);
+      const {queryByText} = setup(loggedInState);
       const logoutLink = queryByText("Logout");
       fireEvent.click(logoutLink);
       const loginLink = queryByText("Login");
