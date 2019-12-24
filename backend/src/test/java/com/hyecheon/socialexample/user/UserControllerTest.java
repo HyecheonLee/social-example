@@ -1,5 +1,6 @@
-package com.hyecheon.socialexample;
+package com.hyecheon.socialexample.user;
 
+import com.hyecheon.socialexample.TestUtil;
 import com.hyecheon.socialexample.configuration.AppConfiguration;
 import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.GenericResponse;

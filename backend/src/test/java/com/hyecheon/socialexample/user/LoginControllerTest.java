@@ -1,9 +1,7 @@
-package com.hyecheon.socialexample;
+package com.hyecheon.socialexample.user;
 
+import com.hyecheon.socialexample.TestUtil;
 import com.hyecheon.socialexample.error.ApiError;
-import com.hyecheon.socialexample.user.User;
-import com.hyecheon.socialexample.user.UserRepository;
-import com.hyecheon.socialexample.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
