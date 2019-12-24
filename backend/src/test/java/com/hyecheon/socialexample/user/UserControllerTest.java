@@ -559,6 +559,25 @@ public class UserControllerTest {
 
     }
 
+    @Test
+    void putUser_withValidRequestBodyWithJPGImageFroUserWhoHasImage_removesOldImageFromStorage() throws IOException {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+        final String imageString = readFileToBase64("test-jpg.jpg");
+        updateUser.setImage(imageString);
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
+
+        putUser(user.getId(), requestEntity, UserVM.class);
+
+        String storedImageName = response.getBody().getImage();
+        final String profilePicturePath = appConfiguration.getFullProfileImagePath() + "/" + storedImageName;
+        final File storedImage = new File(profilePicturePath);
+        assertThat(storedImage.exists()).isFalse();
+    }
+
     @AfterEach
     void clearDir() throws IOException {
         FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagePath()));

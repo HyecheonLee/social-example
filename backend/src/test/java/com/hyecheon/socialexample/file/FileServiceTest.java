@@ -34,7 +34,7 @@ class FileServiceTest {
 
     @Test
     void detectType_whenPngFIleProvided_returnsImagePng() throws IOException {
-        final ClassPathResource resourceFile = new ClassPathResource("test-png.png");
+        final ClassPathResource resourceFile = new ClassPathResource("test-txt.txt");
         final byte[] fileArr = FileUtils.readFileToByteArray(resourceFile.getFile());
         final String fileType = fileService.detectType(fileArr);
         assertThat(fileType).isEqualToIgnoringCase("image/png");

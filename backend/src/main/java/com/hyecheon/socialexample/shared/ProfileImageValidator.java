@@ -18,6 +18,6 @@ public class ProfileImageValidator implements ConstraintValidator<ProfileImage, 
         }
         byte[] decodedBytes = Base64Utils.decodeFromString(value);
         final String fileType = fileService.detectType(decodedBytes);
-        return fileType.equalsIgnoreCase("image/png") || fileType.equalsIgnoreCase("image/jpg");
+        return fileType.equalsIgnoreCase("image/png") || fileType.equalsIgnoreCase("image/jpeg");
     }
 }
