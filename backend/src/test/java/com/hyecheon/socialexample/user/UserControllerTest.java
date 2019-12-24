@@ -515,6 +515,49 @@ public class UserControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void putUser_withValidRequestBodyWithJPGImageFromAuthorizedUser_ReceiveOK() throws IOException {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+        final String imageString = readFileToBase64("test-jpg.jpg");
+        updateUser.setImage(imageString);
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    }
+
+    @Test
+    void putUser_withValidRequestBodyWithGIFImageFromAuthorizedUser_ReceiveBadRequest() throws IOException {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+        final String imageString = readFileToBase64("test-gif.gif");
+        updateUser.setImage(imageString);
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+        System.out.println(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+    }
+
+    @Test
+    void putUser_withValidRequestBodyWithTXTImageFromAuthorizedUser_receiveValidationErrorForProfileImage() throws IOException {
+        final User user = userService.save(createValidUser("user1"));
+        authenticate(user.getUsername());
+        final UserUpdateVM updateUser = createValidUserUpdateVM();
+        final String imageString = readFileToBase64("test-txt.txt");
+        updateUser.setImage(imageString);
+
+        final HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updateUser);
+        final ResponseEntity<ApiError> response = putUser(user.getId(), requestEntity, ApiError.class);
+        final Map<String, String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("image")).isEqualTo("PNG 와 JPG 파일만 허용 됩니다.");
+
+    }
 
     @AfterEach
     void clearDir() throws IOException {
