@@ -37,6 +37,10 @@ function ProfileCard({user}) {
     }));
   };
   const onFileSelectHandler = e => {
+    setState(value => ({
+      ...value,
+      errors: {}
+    }));
     if (e.target.files.length === 0) {
       return;
     }
@@ -99,7 +103,8 @@ function ProfileCard({user}) {
         image: value.originUser.image,
         displayName: value.originUser.displayName
       },
-      loadedImage: undefined
+      loadedImage: undefined,
+      errors: {}
     }));
   };
   return (

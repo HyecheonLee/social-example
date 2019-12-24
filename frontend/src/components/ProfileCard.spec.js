@@ -431,5 +431,55 @@ describe("ProfileCard", () => {
           "PNG 와 JPG 파일만 허용 됩니다.");
       expect(errorMessage).toBeInTheDocument();
     });
+    it("removes validation error for displayName when user changes the displayName",
+        async () => {
+          const {queryByText, container} = await setupForEdit();
+          apiCalls.updateUser = jest.fn().mockRejectedValue(
+              mockFailUpdateUser);
+
+          const saveButton = queryByText("Save");
+          fireEvent.click(saveButton);
+          await waitForDomChange();
+          const displayInput = container.querySelectorAll("input")[0];
+          fireEvent.change(displayInput, {target: {value: "new-display-name"}});
+
+          const errorMessage = queryByText(
+              "It must have minimum 4 and maximum 255 characters");
+          expect(errorMessage).not.toBeInTheDocument();
+        });
+    it("removes validation error for file when user changes the file",
+        async () => {
+          const {queryByText, container} = await setupForEdit();
+          apiCalls.updateUser = jest.fn().mockRejectedValue(
+              mockFailUpdateUser);
+
+          const saveButton = queryByText("Save");
+          fireEvent.click(saveButton);
+          await waitForDomChange();
+          const displayInput = container.querySelectorAll("input")[1];
+
+          const newFile = new File(["another content"], "example2.png", {
+            type: "image/png"
+          });
+          fireEvent.change(displayInput, {target: {files: [newFile]}});
+
+          const errorMessage = queryByText("PNG 와 JPG 파일만 허용 됩니다.");
+          expect(errorMessage).not.toBeInTheDocument();
+        });
+    it("removes validation error if user cancels", async () => {
+      const {queryByText, container} = await setupForEdit();
+      apiCalls.updateUser = jest.fn().mockRejectedValue(
+          mockFailUpdateUser);
+
+      const saveButton = queryByText("Save");
+      fireEvent.click(saveButton);
+      await waitForDomChange();
+      fireEvent.click(queryByText("Cancel"));
+      fireEvent.click(queryByText("Edit"));
+
+      const errorMessage = queryByText(
+          "It must have minimum 4 and maximum 255 characters");
+      expect(errorMessage).not.toBeInTheDocument();
+    });
   });
 });
