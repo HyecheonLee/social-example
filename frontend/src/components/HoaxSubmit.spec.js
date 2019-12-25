@@ -263,5 +263,84 @@ describe("HoaxSubmit", function () {
       fireEvent.focus(textArea);
       expect(queryByText("Hoaxify")).not.toBeDisabled();
     });
+    it("displays validation error for content",
+        async () => {
+          const {container, queryByText} = setup();
+          const textArea = container.querySelector("textarea");
+          fireEvent.focus(textArea);
+          fireEvent.change(textArea, {target: {value: "Test hoax content"}});
+
+          const mockFunction = jest.fn().mockRejectedValueOnce({
+            response: {
+              data: {
+                validationErrors: {
+                  content: "반드시 최소값 10과(와) 최대값 5000 사이의 크기이어야 합니다."
+                }
+              }
+            }
+          });
+          apiCalls.postHoax = mockFunction;
+
+          const hoaxifyButton = queryByText("Hoaxify");
+          fireEvent.click(hoaxifyButton);
+
+          await waitForDomChange();
+
+          expect(queryByText(
+              "반드시 최소값 10과(와) 최대값 5000 사이의 크기이어야 합니다.")).toBeInTheDocument();
+        });
+    it("clears validation error after clicking cancel",
+        async () => {
+          const {container, queryByText} = setup();
+          const textArea = container.querySelector("textarea");
+          fireEvent.focus(textArea);
+          fireEvent.change(textArea, {target: {value: "Test hoax content"}});
+
+          const mockFunction = jest.fn().mockRejectedValueOnce({
+            response: {
+              data: {
+                validationErrors: {
+                  content: "반드시 최소값 10과(와) 최대값 5000 사이의 크기이어야 합니다."
+                }
+              }
+            }
+          });
+          apiCalls.postHoax = mockFunction;
+
+          const hoaxifyButton = queryByText("Hoaxify");
+          fireEvent.click(hoaxifyButton);
+
+          await waitForDomChange();
+          fireEvent.click(queryByText("Cancel"));
+          expect(queryByText(
+              "반드시 최소값 10과(와) 최대값 5000 사이의 크기이어야 합니다.")).not.toBeInTheDocument();
+        });
+    it("clears validation error after content is changed",
+        async () => {
+          const {container, queryByText} = setup();
+          const textArea = container.querySelector("textarea");
+          fireEvent.focus(textArea);
+          fireEvent.change(textArea, {target: {value: "Test hoax content"}});
+
+          const mockFunction = jest.fn().mockRejectedValueOnce({
+            response: {
+              data: {
+                validationErrors: {
+                  content: "반드시 최소값 10과(와) 최대값 5000 사이의 크기이어야 합니다."
+                }
+              }
+            }
+          });
+          apiCalls.postHoax = mockFunction;
+
+          const hoaxifyButton = queryByText("Hoaxify");
+          fireEvent.click(hoaxifyButton);
+
+          await waitForDomChange();
+          fireEvent.change(textArea,
+              {target: {value: "Test hoax content update"}});
+          expect(queryByText(
+              "반드시 최소값 10과(와) 최대값 5000 사이의 크기이어야 합니다.")).not.toBeInTheDocument();
+        });
   });
 });
