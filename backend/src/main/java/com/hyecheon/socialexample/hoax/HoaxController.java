@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/1.0/hoaxes")
 @RequiredArgsConstructor
@@ -15,7 +17,7 @@ public class HoaxController {
     private final HoaxService hoaxService;
 
     @PostMapping("")
-    public ResponseEntity<?> createHoax(@RequestBody Hoax hoax) {
+    public ResponseEntity<?> createHoax(@Valid @RequestBody Hoax hoax) {
         final Hoax created = hoaxService.save(hoax);
         return ResponseEntity.ok(created);
     }
