@@ -2,6 +2,7 @@ package com.hyecheon.socialexample.hoax;
 
 import com.hyecheon.socialexample.TestUtil;
 import com.hyecheon.socialexample.error.ApiError;
+import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
 import com.hyecheon.socialexample.user.UserService;
 import org.assertj.core.api.Assertions;
@@ -149,6 +150,29 @@ public class HoaxControllerTest {
         final ResponseEntity<ApiError> response = postHoax(hoax, ApiError.class);
         assertThat(response.getBody().getValidationErrors().get("content")).isNotNull();
     }
+
+    @Test
+    void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedWithAuthenticatedUserInfo() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        final Hoax hoax = TestUtil.createValidHoax();
+        postHoax(hoax, Object.class);
+
+        final Hoax inDB = hoaxRepository.findAll().get(0);
+        assertThat(inDB.getUser().getUsername()).isEqualTo("user1");
+    }
+
+    @Test
+    void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        final Hoax hoax = TestUtil.createValidHoax();
+        postHoax(hoax, Object.class);
+
+        final User user1 = userRepository.findByUsername("user1").get();
+        assertThat(user1.getHoaxes().size()).isEqualTo(1);
+    }
+
 
     private <T> ResponseEntity<T> postHoax(Hoax hoax, Class<T> responseType) {
         return testRestTemplate.postForEntity(API_1_0_HOAXES, hoax, responseType);

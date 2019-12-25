@@ -1,5 +1,6 @@
 package com.hyecheon.socialexample.hoax;
 
+import com.hyecheon.socialexample.user.User;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -14,6 +15,10 @@ public class Hoax {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @NotBlank
     @Size(min = 10, max = 5000)

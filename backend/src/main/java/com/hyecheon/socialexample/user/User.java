@@ -2,6 +2,7 @@ package com.hyecheon.socialexample.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.hyecheon.socialexample.hoax.Hoax;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,14 +10,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.beans.Transient;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -42,6 +43,9 @@ public class User implements UserDetails {
     private String password;
 
     private String image;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Hoax> hoaxes = new ArrayList<>();
 
     @Override
     @Transient
