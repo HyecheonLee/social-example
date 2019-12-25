@@ -307,4 +307,13 @@ describe("App", () => {
 
         expect(user1Info).toBeInTheDocument();
       });
+  describe("postHoax", () => {
+    it("call /api/1.0/hoaxes", () => {
+      const mockPostHoax = jest.fn();
+      axios.post = mockPostHoax;
+      apiCalls.postHoax();
+      const path = mockPostHoax.mock.calls[0][0];
+      expect(path).toBe("/api/1.0/hoaxes");
+    })
+  });
 });

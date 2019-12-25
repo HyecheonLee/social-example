@@ -33,5 +33,5 @@ public class Hoax {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @CreationTimestamp
-    private Date timestamp;
+    private LocalDateTime timestamp;
 }

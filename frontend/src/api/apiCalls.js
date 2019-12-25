@@ -2,6 +2,11 @@ import axios from "axios";
 
 const USER_URL = "/api/1.0/users";
 const LOGIN_URL = "/api/1.0/login";
+const HOAX_URL = "/api/1.0/hoaxes";
+
+export function postHoax(hoax) {
+  return axios.post(`${HOAX_URL}`, hoax);
+}
 
 export function updateUser(userId, body) {
   return axios.put(`${USER_URL}/${userId}`, body);
