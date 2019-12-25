@@ -17,6 +17,9 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Map;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -33,8 +36,12 @@ public class HoaxControllerTest {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    private HoaxRepository hoaxRepository;
+
     @BeforeEach
     void cleanup() {
+        hoaxRepository.deleteAll();
         userRepository.deleteAll();
         testRestTemplate.getRestTemplate().getInterceptors().clear();
     }
@@ -61,6 +68,27 @@ public class HoaxControllerTest {
         final Hoax hoax = TestUtil.createValidHoax();
         final ResponseEntity<ApiError> response = postHoax(hoax, ApiError.class);
         assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedToDatabase() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        final Hoax hoax = TestUtil.createValidHoax();
+        postHoax(hoax, Object.class);
+
+        assertThat(hoaxRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedToDatabaseWithTimestamp() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        final Hoax hoax = TestUtil.createValidHoax();
+        final ResponseEntity<Hoax> response = postHoax(hoax, Hoax.class);
+
+        final Hoax findHoax = hoaxRepository.findById(response.getBody().getId()).get();
+        assertThat(findHoax.getTimestamp()).isNotNull();
     }
 
     private <T> ResponseEntity<T> postHoax(Hoax hoax, Class<T> responseType) {
