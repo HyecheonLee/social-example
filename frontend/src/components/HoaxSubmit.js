@@ -2,18 +2,24 @@ import React, {useState} from 'react';
 import ProfileImageWithDefault from "./ProfileImageWithDefault";
 import {useSelector} from "react-redux";
 import * as apiCalls from '../api/apiCalls';
+import ButtonWithProgress from "./ButtonWithProgress";
 
 function HoaxSubmit(props) {
-  const initValue = {isFocus: false, row: 1, content: ""};
+  const textAreaInit = {isFocus: false, row: 1, content: ""};
   const auth = useSelector(state => ({...state.auth}));
-  const [textArea, setTextRow] = useState(initValue);
+  const [textArea, setTextRow] = useState(textAreaInit);
+  const [pendingApi, setPendingApi] = useState(false);
   const onClickHoaxify = () => {
     const hoax = {
       content: textArea.content
     };
+    setPendingApi(true);
     apiCalls.postHoax(hoax).then(response => {
-      setTextRow(initValue);
-    });
+      setPendingApi(false);
+      setTextRow(textAreaInit);
+    }).catch(error => {
+      setPendingApi(false);
+    })
   };
   const onChangeHandler = (e) => {
     const {name, value} = e.target;
@@ -41,12 +47,15 @@ function HoaxSubmit(props) {
           />
           {textArea.isFocus &&
           <div className="text-right mt-1">
-            <button
+            <ButtonWithProgress
+                pendingApiCall={pendingApi}
+                text={"Hoaxify"}
+                disabled={pendingApi}
                 onClick={onClickHoaxify}
-                className={"btn btn-success"}>Hoaxify
-            </button>
+                className={"btn btn-success"}/>
             <button
-                onClick={e => setTextRow(initValue)}
+                disabled={pendingApi}
+                onClick={e => setTextRow(textAreaInit)}
                 className={"btn btn-light ml-1"}>
               <i className={"fas fa-times"}/>Cancel
             </button>

@@ -4,16 +4,18 @@ export default function ButtonWithProgress({
   onClick,
   disabled,
   pendingApiCall,
-  text
+  text,
+  className
 }) {
   return (
-    <button className="btn btn-primary" onClick={onClick} disabled={disabled}>
-      {pendingApiCall && (
-        <div className="spinner-border text-light spinner-border-sm mr-1">
-          <span className="sr-only">Loading...</span>
-        </div>
-      )}
-      {text}
-    </button>
+      <button className={className || "btn btn-primary"} onClick={onClick}
+              disabled={disabled}>
+        {pendingApiCall && (
+            <div className="spinner-border text-light spinner-border-sm mr-1">
+              <span className="sr-only">Loading...</span>
+            </div>
+        )}
+        {text}
+      </button>
   );
 }
