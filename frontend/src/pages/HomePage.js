@@ -1,10 +1,18 @@
 import React from "react";
 import UserList from "../components/UserList";
+import HoaxSubmit from "../components/HoaxSubmit";
 
 export default function HomePage() {
   return (
       <div data-testid="homepage">
-        <UserList/>
+        <div className="row">
+          <div className="col-8">
+            <HoaxSubmit/>
+          </div>
+          <div className="col-4">
+            <UserList/>
+          </div>
+        </div>
       </div>
   );
 }
