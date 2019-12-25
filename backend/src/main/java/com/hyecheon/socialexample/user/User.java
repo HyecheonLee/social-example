@@ -6,6 +6,7 @@ import com.hyecheon.socialexample.hoax.Hoax;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@ToString(exclude = "hoaxes")
 public class User implements UserDetails {
     @Id
     @GeneratedValue
@@ -44,7 +46,7 @@ public class User implements UserDetails {
 
     private String image;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Hoax> hoaxes = new ArrayList<>();
 
     @Override

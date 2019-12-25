@@ -5,7 +5,6 @@ import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
 import com.hyecheon.socialexample.user.UserService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +17,10 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Map;
-import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+
 public class HoaxControllerTest {
     public static final String API_1_0_HOAXES = "/api/1.0/hoaxes";
     @Autowired
@@ -41,6 +43,9 @@ public class HoaxControllerTest {
 
     @Autowired
     private HoaxRepository hoaxRepository;
+
+    @PersistenceUnit
+    EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     void cleanup() {
@@ -156,21 +161,30 @@ public class HoaxControllerTest {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         final Hoax hoax = TestUtil.createValidHoax();
-        postHoax(hoax, Object.class);
+        final ResponseEntity<Hoax> response = postHoax(hoax, Hoax.class);
 
-        final Hoax inDB = hoaxRepository.findAll().get(0);
+        final EntityManager em = entityManagerFactory.createEntityManager();
+        final EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
+        final Hoax inDB = em.find(Hoax.class, response.getBody().getId());
         assertThat(inDB.getUser().getUsername()).isEqualTo("user1");
+
+        tx.commit();
     }
 
     @Test
     void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity() {
-        userService.save(TestUtil.createValidUser("user1"));
+        final User savedUser = userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
+        final EntityManager em = entityManagerFactory.createEntityManager();
+        final EntityTransaction tx = em.getTransaction();
+        tx.begin();
         final Hoax hoax = TestUtil.createValidHoax();
         postHoax(hoax, Object.class);
-
-        final User user1 = userRepository.findByUsername("user1").get();
-        assertThat(user1.getHoaxes().size()).isEqualTo(1);
+        final User user = em.find(User.class, savedUser.getId());
+        assertThat(user.getHoaxes().size()).isEqualTo(1);
+        tx.commit();
     }
 
 
