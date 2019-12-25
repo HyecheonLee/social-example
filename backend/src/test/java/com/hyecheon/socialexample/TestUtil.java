@@ -1,5 +1,6 @@
 package com.hyecheon.socialexample;
 
+import com.hyecheon.socialexample.hoax.Hoax;
 import com.hyecheon.socialexample.user.User;
 
 public class TestUtil {
@@ -16,5 +17,11 @@ public class TestUtil {
         final User user = createValidUser();
         user.setUsername(username);
         return user;
+    }
+
+    public static Hoax createValidHoax() {
+        final Hoax hoax = new Hoax();
+        hoax.setContent("test content for the test hoax");
+        return hoax;
     }
 }
