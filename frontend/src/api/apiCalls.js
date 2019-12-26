@@ -4,6 +4,34 @@ const USER_URL = "/api/1.0/users";
 const LOGIN_URL = "/api/1.0/login";
 const HOAX_URL = "/api/1.0/hoaxes";
 
+export function loadHoaxes(username, param) {
+  let api;
+  if (username) {
+    api = `${USER_URL}/${username}/hoaxes${makeParam(param)}`;
+  } else {
+    api = `${HOAX_URL}${makeParam(param)}`;
+  }
+  return axios.get(api);
+}
+
+function makeParam(params) {
+  if (!params) {
+    return ""
+  } else {
+    const keys = ["page", "size", "sort"];
+    const result = keys.map(value => {
+      if (params.hasOwnProperty(value)) {
+        return value + "=" + params[value];
+      }
+      return "";
+    }).join("&");
+    if (result) {
+      return "?" + result;
+    }
+    return "";
+  }
+}
+
 export function postHoax(hoax) {
   return axios.post(`${HOAX_URL}`, hoax);
 }
