@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import * as apiCalls from "../api/apiCalls";
 import Spinner from "./Spinner";
+import HoaxView from "./HoaxView";
 
 function HoaxFeed({username = ""}) {
   const [state, setState] = useState({
@@ -30,7 +31,7 @@ function HoaxFeed({username = ""}) {
     );
   }
   return <div>{state.page.content.map((hoax) => {
-    return <span key={hoax.id}>{hoax.content}</span>
+    return <HoaxView key={hoax.id} hoax={hoax}/>
   })}</div>;
 }
 

@@ -11,12 +11,14 @@ const mockEmptyResponse = {
     content: []
   }
 };
+
 const mockSuccessGetHoaxesSinglePage = {
   data: {
     content: [
       {
         id: 10,
         content: "This is the latest hoax",
+        timestamp: "2019-12-26 16:55:09",
         user: {
           id: 1,
           username: "user1",
