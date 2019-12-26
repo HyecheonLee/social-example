@@ -30,9 +30,19 @@ function HoaxFeed({username = ""}) {
         <div className="card card-header text-center">There are no hoaxes</div>
     );
   }
-  return <div>{state.page.content.map((hoax) => {
-    return <HoaxView key={hoax.id} hoax={hoax}/>
-  })}</div>;
+  console.log(state.page)
+  return (
+      <div>
+        {state.page.content.map(hoax => {
+          return <HoaxView key={hoax.id} hoax={hoax}/>;
+        })}
+        {state.page.last === false && (
+            <div className="card card-header text-center">
+              Load More
+            </div>
+        )}
+      </div>
+  );
 }
 
 export default HoaxFeed;
