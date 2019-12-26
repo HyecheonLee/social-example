@@ -2,6 +2,8 @@ import React, {useEffect, useState} from "react";
 import * as apiCalls from "../api/apiCalls";
 import ProfileCard from "../components/ProfileCard";
 import {useSelector} from "react-redux";
+import HoaxFeed from "../components/HoaxFeed";
+import {useParams} from "react-router-dom";
 
 export default function UserPage({match}) {
   const auth = useSelector(state => ({...state.auth}));
@@ -10,6 +12,7 @@ export default function UserPage({match}) {
     userNotFound: false,
     isLoadingUser: false
   });
+  const {username} = useParams();
   const {user} = state;
   useEffect(() => {
     const username = match.params.username;
@@ -55,11 +58,18 @@ export default function UserPage({match}) {
     );
   } else {
     let isEditable = auth.username === match.params.username;
-    pageContent = user &&
-        <ProfileCard
-            user={user}
-            isEditable={isEditable}
-        />;
+    pageContent = user && <ProfileCard user={user} isEditable={isEditable}/>;
   }
-  return <div data-testid="UserPage">{pageContent}</div>;
+  return (
+      <div data-testid="UserPage">
+        <div className="row">
+          <div className="col">
+            {pageContent}
+          </div>
+          <div className="col">
+            <HoaxFeed username={username}/>
+          </div>
+        </div>
+      </div>
+  );
 }

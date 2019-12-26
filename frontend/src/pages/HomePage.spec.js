@@ -4,7 +4,7 @@ import HomePage from "./HomePage";
 import {createStore} from "redux";
 import rootReducer from "../redux";
 import {Provider} from "react-redux";
-import HoaxSubmit from "../components/HoaxSubmit";
+import * as apiCalls from '../api/apiCalls';
 
 const defaultState = {
   id: 1,
@@ -24,6 +24,14 @@ const setup = (state = defaultState) => {
       </Provider>
   );
 };
+
+apiCalls.loadHoaxes = jest.fn().mockResolvedValue({
+  data: {
+    content: [],
+    number: 0,
+    size: 3
+  }
+});
 
 describe("HomePage", () => {
   describe("Layout", () => {
