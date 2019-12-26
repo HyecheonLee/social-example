@@ -2,6 +2,7 @@ package com.hyecheon.socialexample.hoax;
 
 import com.hyecheon.socialexample.hoax.vm.HoaxVM;
 import com.hyecheon.socialexample.user.User;
+import com.hyecheon.socialexample.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/1.0")
@@ -19,6 +21,7 @@ import java.net.URISyntaxException;
 public class HoaxController {
 
     private final HoaxService hoaxService;
+    private final UserService userService;
 
     @PostMapping("/hoaxes")
     public ResponseEntity<?> createHoax(@AuthenticationPrincipal User user, @Valid @RequestBody Hoax hoax) throws URISyntaxException {
@@ -30,5 +33,10 @@ public class HoaxController {
     public ResponseEntity<Page<?>> getAllHoaxes(Pageable pageable) {
         final Page<HoaxVM> map = hoaxService.getHoaxes(pageable).map(HoaxVM::new);
         return ResponseEntity.ok(map);
+    }
+
+    @GetMapping("/users/{username}/hoaxes")
+    public ResponseEntity<Page<?>> getAllHoaxes(@PathVariable(name = "username") String username, Pageable pageable) {
+        return ResponseEntity.ok(hoaxService.getHoaxesOfUser(username, pageable).map(HoaxVM::new));
     }
 }

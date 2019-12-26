@@ -3,9 +3,7 @@ package com.hyecheon.socialexample.user;
 import com.hyecheon.socialexample.error.NotFoundException;
 import com.hyecheon.socialexample.file.FileService;
 import com.hyecheon.socialexample.user.vm.UserUpdateVM;
-import com.hyecheon.socialexample.user.vm.UserVM;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.commons.CommonsFileUploadSupport;
 
 import java.io.IOException;
 
@@ -42,8 +39,12 @@ public class UserService {
         return userRepository.findAll(pageable);
     }
 
-    public UserVM findByUsername(String username) {
-        return userRepository.findByUsername(username).map(UserVM::new).orElseThrow(() -> new NotFoundException(username + " not found"));
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(username + " not found"));
+    }
+
+    public boolean isUserExistsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
     public User update(Long id, UserUpdateVM userUpdate) {

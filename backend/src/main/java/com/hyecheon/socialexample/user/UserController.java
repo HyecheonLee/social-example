@@ -36,7 +36,7 @@ public class UserController {
 
     @GetMapping("/api/1.0/users/{username}")
     public ResponseEntity<?> getUserByName(@PathVariable String username) {
-        return new ResponseEntity<>(userService.findByUsername(username), HttpStatus.OK);
+        return new ResponseEntity<>(new UserVM(userService.findByUsername(username)), HttpStatus.OK);
     }
 
     @PutMapping("/api/1.0/users/{id:[0-9]+}")
