@@ -4,6 +4,7 @@ import ProfileCard from "../components/ProfileCard";
 import {useSelector} from "react-redux";
 import HoaxFeed from "../components/HoaxFeed";
 import {useParams} from "react-router-dom";
+import Spinner from "../components/Spinner";
 
 export default function UserPage({match}) {
   const auth = useSelector(state => ({...state.auth}));
@@ -40,13 +41,7 @@ export default function UserPage({match}) {
 
   let pageContent;
   if (state.isLoadingUser) {
-    pageContent = (
-        <div className="d-flex">
-          <div className="spinner-border text-black-50 m-auto">
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
-    );
+    pageContent = <Spinner/>;
   } else if (state.userNotFound) {
     pageContent = (
         <div className="alert alert-danger text-center">
