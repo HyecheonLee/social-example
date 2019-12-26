@@ -2,6 +2,7 @@ package com.hyecheon.socialexample.hoax;
 
 import com.hyecheon.socialexample.TestUtil;
 import com.hyecheon.socialexample.error.ApiError;
+import com.hyecheon.socialexample.hoax.vm.HoaxVM;
 import com.hyecheon.socialexample.user.TestPage;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserRepository;
@@ -61,13 +62,13 @@ public class HoaxControllerTest {
     }
 
     @Test
-    void postHoax_WhenHoaxIsValidAndUserIsAuthorized_receiveOk() {
+    void postHoax_WhenHoaxIsValidAndUserIsAuthorized_receiveCREATED() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         final Hoax hoax = TestUtil.createValidHoax();
 
         final ResponseEntity<Object> response = postHoax(hoax, Object.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
     @Test
@@ -128,7 +129,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    void postHoax_WhenHoaxContentIs5000CharactersAndUserIsAuthorized_receiveOk() {
+    void postHoax_WhenHoaxContentIs5000CharactersAndUserIsAuthorized_receiveCREATED() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         final Hoax hoax = TestUtil.createValidHoax();
@@ -136,7 +137,7 @@ public class HoaxControllerTest {
         hoax.setContent(characters5000);
 
         final ResponseEntity<Object> response = postHoax(hoax, Object.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
     @Test
@@ -202,7 +203,7 @@ public class HoaxControllerTest {
 
     @Test
     void getHoaxes_whenThereAreNoHoaxes_receivePageWithZeroItems() {
-        final ResponseEntity<TestPage<Hoax>> response = getHoax(new ParameterizedTypeReference<>() {
+        final ResponseEntity<TestPage<Object>> response = getHoax(new ParameterizedTypeReference<>() {
         });
         assertThat(response.getBody().getTotalElements()).isEqualTo(0);
     }
@@ -214,9 +215,30 @@ public class HoaxControllerTest {
         hoaxService.save(user, TestUtil.createValidHoax());
         hoaxService.save(user, TestUtil.createValidHoax());
 
-        final ResponseEntity<TestPage<Hoax>> response = getHoax(new ParameterizedTypeReference<TestPage<Hoax>>() {
+        final ResponseEntity<TestPage<Object>> response = getHoax(new ParameterizedTypeReference<TestPage<Object>>() {
         });
         assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+    }
+
+    @Test
+    void getHoaxes_whenThereAreHoaxes_receivePageWithHoaxVM() {
+        final User user = userService.save(TestUtil.createValidUser("user1"));
+        hoaxService.save(user, TestUtil.createValidHoax());
+        hoaxService.save(user, TestUtil.createValidHoax());
+        hoaxService.save(user, TestUtil.createValidHoax());
+
+        final ResponseEntity<TestPage<HoaxVM>> response = getHoax(new ParameterizedTypeReference<>() {
+        });
+        assertThat(response.getBody().getContent().get(0).getUser().getUsername()).isEqualTo("user1");
+    }
+
+    @Test
+    void postHoax_whenHoaxIsValidAndUserIsAuthorized_receiveHoaxVM() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        final Hoax hoax = TestUtil.createValidHoax();
+        final ResponseEntity<HoaxVM> response = postHoax(hoax, HoaxVM.class);
+        assertThat(response.getBody().getUser().getUsername()).isEqualTo("user1");
     }
 
     private <T> ResponseEntity<T> getHoax(ParameterizedTypeReference<T> responseType) {
