@@ -25,7 +25,6 @@ export const signup = user => {
   return axios.post(USER_URL, user);
 };
 export const login = user => {
-
   return axios.post(LOGIN_URL, {}, {auth: user});
 };
 export const setAuthorizationHeader = ({username, password, isLoggedIn}) => {

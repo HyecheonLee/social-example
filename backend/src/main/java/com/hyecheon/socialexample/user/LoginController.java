@@ -1,6 +1,5 @@
 package com.hyecheon.socialexample.user;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.hyecheon.socialexample.error.ApiError;
 import com.hyecheon.socialexample.shared.CurrentUser;
 import com.hyecheon.socialexample.user.vm.UserVM;
