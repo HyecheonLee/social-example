@@ -12,6 +12,9 @@ spring:
         persistence:
           validation:
             mode: none
+      hibernate:
+        default_batch_fetch_size: 1000
+        format_sql: true
   data:
     web:
       pageable:
@@ -38,6 +41,8 @@ spring:
 rainbow:
   upload-path: uploads-dev
 ---
+logging:.level:
+  org.hibernate.SQL: debug
 spring:
   profiles: test
 rainbow:

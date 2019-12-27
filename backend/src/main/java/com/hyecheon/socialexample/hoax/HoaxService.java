@@ -2,12 +2,15 @@ package com.hyecheon.socialexample.hoax;
 
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserService;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -26,29 +29,35 @@ public class HoaxService {
     }
 
     public Page<Hoax> getHoaxesOfUser(String username, Pageable pageable) {
-        final User user = userService.findByUsername(username);
-        return hoaxRepository.findByUser(user, pageable);
-    }
-
-    public Page<Hoax> getHoaxesOfUser(String username) {
-        return getHoaxesOfUser(username, PageRequest.of(0, 20));
-    }
-
-    public Page<Hoax> getOldHoaxes(Long id, Pageable pageable) {
-        return hoaxRepository.findByIdLessThan(id, pageable);
-    }
-
-    public Page<Hoax> getNewHoaxes(Long id, Pageable pageable) {
-        return hoaxRepository.findByIdGreaterThan(id, pageable);
+        return hoaxRepository.findAll(eqUsername(username), pageable);
     }
 
     public Page<Hoax> getOldHoaxesOfUser(String username, Long id, Pageable pageable) {
-        final User user = userService.findByUsername(username);
-        return hoaxRepository.findByUserAndIdLessThan(user, id, pageable);
+        final Predicate predicate = ExpressionUtils.and(eqUsername(username), lessThenId(id));
+        return hoaxRepository.findAll(predicate, pageable);
     }
 
     public Page<Hoax> getNewHoaxesOfUser(String username, Long id, Pageable pageable) {
-        final User user = userService.findByUsername(username);
-        return hoaxRepository.findByUserAndIdGreaterThan(user, id, pageable);
+        final Predicate predicate = ExpressionUtils.and(eqUsername(username), greaterThan(id));
+        return hoaxRepository.findAll(predicate, pageable);
+    }
+
+    private BooleanExpression eqUsername(String username) {
+        if (StringUtils.hasText(username)) {
+            final User user = userService.findByUsername(username);
+            return QHoax.hoax.user.eq(user);
+        }
+        return null;
+    }
+
+    private BooleanExpression greaterThan(Long id) {
+        if (id != null) {
+            return QHoax.hoax.id.gt(id);
+        }
+        return null;
+    }
+
+    private BooleanExpression lessThenId(Long id) {
+        return QHoax.hoax.id.lt(id);
     }
 }
