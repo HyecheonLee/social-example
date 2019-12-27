@@ -17,4 +17,6 @@ public interface HoaxRepository extends JpaRepository<Hoax, Long> {
     Page<Hoax> findByIdGreaterThan(Long id, Pageable pageable);
 
     Page<Hoax> findByUserAndIdLessThan(User user, Long id, Pageable pageable);
+
+    Page<Hoax> findByUserAndIdGreaterThan(User user, Long id, Pageable pageable);
 }
