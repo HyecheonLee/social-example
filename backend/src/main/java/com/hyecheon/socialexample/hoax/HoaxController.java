@@ -42,4 +42,10 @@ public class HoaxController {
         final Page<Hoax> hoaxes = hoaxService.getOldHoaxes(id, pageable);
         return ResponseEntity.ok(hoaxes.map(HoaxVM::new));
     }
+
+    @GetMapping("/users/{username}/hoaxes/{id:[0-9]+}")
+    ResponseEntity<Page<HoaxVM>> getHoaxesRelativeForUser(@PathVariable String username, @PathVariable Long id, Pageable pageable) {
+        final Page<Hoax> hoaxes = hoaxService.getOldHoaxesOfUser(username, id, pageable);
+        return ResponseEntity.ok(hoaxes.map(HoaxVM::new));
+    }
 }
