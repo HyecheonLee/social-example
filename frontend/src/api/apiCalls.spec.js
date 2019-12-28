@@ -76,7 +76,8 @@ describe("apiCalls", () => {
           axios.get = mockHetHoaxes;
           apiCalls.loadHoaxes("", {page: 0, size: 5, sort: "id,desc"});
           expect(mockHetHoaxes).toBeCalledWith(
-              "/api/1.0/hoaxes?page=0&size=5&sort=id,desc");
+              "/api/1.0/hoaxes?page=0&size=5&sort=id,desc"
+          );
         });
     it("calls /api/1.0/users/user1/hoaxes?page=0&size=5&sort=id,desc when user param params",
         () => {
@@ -84,8 +85,90 @@ describe("apiCalls", () => {
           axios.get = mockHetHoaxes;
           apiCalls.loadHoaxes("user1", {page: 0, size: 5, sort: "id,desc"});
           expect(mockHetHoaxes).toBeCalledWith(
-              "/api/1.0/users/user1/hoaxes?page=0&size=5&sort=id,desc");
+              "/api/1.0/users/user1/hoaxes?page=0&size=5&sort=id,desc"
+          );
+        });
+  });
+  describe("loadOldHoaxes", () => {
+    it("calls /api/1.0/hoaxes/5?direction=before&page=0&size=5&sort=id,desc when hoax id provided",
+        () => {
+          const mockGetHoaxes = jest.fn();
+          axios.get = mockGetHoaxes;
+          apiCalls.loadHoaxesById(5, {
+            direction: "before",
+            page: "0",
+            size: "5",
+            sort: "id,desc"
+          });
+          expect(mockGetHoaxes).toBeCalledWith(
+              "/api/1.0/hoaxes/5?direction=before&page=0&size=5&sort=id,desc"
+          );
+        });
+    it("calls /api/1.0/users/user3/hoaxes/5?direction=before&page=0&size=5&sort=id,desc when username and hoax id param provided",
+        () => {
+          const mockGetHoaxes = jest.fn();
+          axios.get = mockGetHoaxes;
+          apiCalls.loadHoaxesOfUserById("user3", 5, {
+            direction: "before",
+            page: "0",
+            size: "5",
+            sort: "id,desc"
+          });
+          expect(mockGetHoaxes).toBeCalledWith(
+              "/api/1.0/users/user3/hoaxes/5?direction=before&page=0&size=5&sort=id,desc"
+          );
+        });
+  });
+  describe("loadNewHoaxes", () => {
+    it("calls /api/1.0/hoaxes/5?direction=after&page=0&size=5&sort=id,desc when hoax id provided",
+        () => {
+          const mockGetHoaxes = jest.fn();
+          axios.get = mockGetHoaxes;
+          apiCalls.loadHoaxesById(5, {
+            direction: "after",
+            page: "0",
+            size: "5",
+            sort: "id,desc"
+          });
+          expect(mockGetHoaxes).toBeCalledWith(
+              "/api/1.0/hoaxes/5?direction=after&page=0&size=5&sort=id,desc"
+          );
+        });
+    it("calls /api/1.0/users/user3/hoaxes/5?direction=after&page=0&size=5&sort=id,desc when username and hoax id param provided",
+        () => {
+          const mockGetHoaxes = jest.fn();
+          axios.get = mockGetHoaxes;
+          apiCalls.loadHoaxesOfUserById("user3", 5, {
+            direction: "after",
+            page: "0",
+            size: "5",
+            sort: "id,desc"
+          });
+          expect(mockGetHoaxes).toBeCalledWith(
+              "/api/1.0/users/user3/hoaxes/5?direction=after&page=0&size=5&sort=id,desc"
+          );
+        });
+    it("calls /api/1.0/hoaxes/5/count?direction=after when hoax id provided",
+        () => {
+          const mockGetHoaxes = jest.fn();
+          axios.get = mockGetHoaxes;
+          apiCalls.loadHoaxesCountById(5, {
+            direction: "after",
+          });
+          expect(mockGetHoaxes).toBeCalledWith(
+              "/api/1.0/hoaxes/5/count?direction=after"
+          );
+        });
+    it("calls /api/1.0/users/user3/hoaxes/5/count?direction=after when username and hoax id param provided",
+        () => {
+          const mockGetHoaxes = jest.fn();
+          axios.get = mockGetHoaxes;
+          apiCalls.loadHoaxesOfUserCountById("user3", 5, {
+            direction: "after"
+          });
+          expect(mockGetHoaxes).toBeCalledWith(
+              "/api/1.0/users/user3/hoaxes/5/count?direction=after"
+          );
         });
   });
 });
-

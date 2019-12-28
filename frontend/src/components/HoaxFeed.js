@@ -30,7 +30,7 @@ function HoaxFeed({username = ""}) {
         <div className="card card-header text-center">There are no hoaxes</div>
     );
   }
-  console.log(state.page)
+
   return (
       <div>
         {state.page.content.map(hoax => {

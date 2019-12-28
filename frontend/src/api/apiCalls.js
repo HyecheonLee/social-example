@@ -4,6 +4,27 @@ const USER_URL = "/api/1.0/users";
 const LOGIN_URL = "/api/1.0/login";
 const HOAX_URL = "/api/1.0/hoaxes";
 
+export function loadHoaxesOfUserCountById(username, hoaxId, params) {
+  const path = `${USER_URL}/${username}/hoaxes/${hoaxId}/count${makeParam(
+      params)}`;
+  return axios.get(path);
+}
+
+export function loadHoaxesCountById(hoaxId, params) {
+  const path = `${HOAX_URL}/${hoaxId}/count${makeParam(params)}`;
+  return axios.get(path);
+}
+
+export function loadHoaxesOfUserById(username, hoaxId, params) {
+  const path = `${USER_URL}/${username}/hoaxes/${hoaxId}${makeParam(params)}`;
+  return axios.get(path);
+}
+
+export function loadHoaxesById(hoaxId, params) {
+  const path = `${HOAX_URL}/${hoaxId}${makeParam(params)}`;
+  return axios.get(path);
+}
+
 export function loadHoaxes(username, param) {
   let api;
   if (username) {
@@ -18,12 +39,11 @@ function makeParam(params) {
   if (!params) {
     return ""
   } else {
-    const keys = ["page", "size", "sort"];
-    const result = keys.map(value => {
-      if (params.hasOwnProperty(value)) {
-        return value + "=" + params[value];
-      }
-      return "";
+    const keys = ["direction", "page", "size", "sort"];
+    const result = keys.filter(value => {
+      return params.hasOwnProperty(value)
+    }).map(value => {
+      return value + "=" + params[value];
     }).join("&");
     if (result) {
       return "?" + result;
