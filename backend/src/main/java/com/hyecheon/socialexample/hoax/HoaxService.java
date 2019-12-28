@@ -24,12 +24,12 @@ public class HoaxService {
         return hoaxRepository.save(hoax);
     }
 
-    public Page<Hoax> getHoaxes(Pageable pageable) {
-        return hoaxRepository.findAll(pageable);
-    }
-
     public Page<Hoax> getHoaxesOfUser(String username, Pageable pageable) {
-        return hoaxRepository.findAll(eqUsername(username), pageable);
+        final BooleanExpression eqUsername = eqUsername(username);
+        if (eqUsername != null) {
+            return hoaxRepository.findAll(eqUsername, pageable);
+        }
+        return hoaxRepository.findAll(pageable);
     }
 
     public Page<Hoax> getOldHoaxesOfUser(String username, Long id, Pageable pageable) {
@@ -41,6 +41,17 @@ public class HoaxService {
         final Predicate predicate = ExpressionUtils.and(eqUsername(username), greaterThan(id));
         return hoaxRepository.findAll(predicate, pageable);
     }
+
+    public long getOldHoaxesCount(String username, Long id) {
+        final Predicate predicate = ExpressionUtils.and(eqUsername(username), lessThenId(id));
+        return hoaxRepository.count(predicate);
+    }
+
+    public long getNewHoaxesCount(String username, Long id) {
+        final Predicate predicate = ExpressionUtils.and(eqUsername(username), greaterThan(id));
+        return hoaxRepository.count(predicate);
+    }
+
 
     private BooleanExpression eqUsername(String username) {
         if (StringUtils.hasText(username)) {
