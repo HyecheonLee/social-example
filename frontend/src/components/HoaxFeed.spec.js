@@ -11,7 +11,9 @@ import { MemoryRouter } from "react-router-dom";
 
 const originalSetInterval = window.setInterval;
 const originalClearInterval = window.clearInterval;
+
 let timedFunction;
+
 const useFakeIntervals = () => {
   window.setInterval = (callback, interval) => {
     timedFunction = callback;
@@ -25,6 +27,7 @@ const useRealIntervals = () => {
   window.setInterval = originalSetInterval;
   window.clearInterval = originalClearInterval;
 };
+
 const runTimer = () => {
   timedFunction && timedFunction();
 };
@@ -64,12 +67,34 @@ const mockSuccessGetHoaxesSinglePage = {
     totalPages: 1
   }
 };
+const mockSuccessGetHoaxesMiddleOfMultiPage = {
+  data: {
+    content: [
+      {
+        id: 10,
+        content: "This hoax is in middle page",
+        timestamp: "2019-12-26 16:55:09",
+        user: {
+          id: 1,
+          username: "user1",
+          displayName: "display1",
+          image: "profile1.png"
+        }
+      }
+    ],
+    number: 0,
+    first: false,
+    last: false,
+    size: 5,
+    totalPages: 1
+  }
+};
 const mockSuccessGetHoaxesFirstOfMultiPage = {
   data: {
     content: [
       {
         id: 10,
-        content: "This is the latest hoax",
+        content: "This is the newest hoax",
         timestamp: "2019-12-26 16:55:09",
         user: {
           id: 1,
@@ -93,6 +118,39 @@ const mockSuccessGetHoaxesFirstOfMultiPage = {
     number: 0,
     first: true,
     last: false,
+    size: 5,
+    totalPages: 2
+  }
+};
+const mockSuccessGetNewHoaxesList = {
+  data: {
+    content: [
+      {
+        id: 12,
+        content: "This is the newest hoax test",
+        timestamp: "2019-12-26 16:55:09",
+        user: {
+          id: 1,
+          username: "user1",
+          displayName: "display1",
+          image: "profile1.png"
+        }
+      },
+      {
+        id: 11,
+        content: "This is 9",
+        timestamp: "2019-12-27 16:55:09",
+        user: {
+          id: 1,
+          username: "user1",
+          displayName: "display1",
+          image: "profile1.png"
+        }
+      }
+    ],
+    number: 0,
+    first: true,
+    last: true,
     size: 5,
     totalPages: 2
   }
@@ -349,6 +407,285 @@ describe("HoaxFeed", function() {
         queryByText("This is the oldest hoax")
       );
       expect(queryByText("Load More")).not.toBeInTheDocument();
+    });
+    fit("calls loadNewHoaxes with hoax id when clicking New Hoax Count Card", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetNewHoaxesList);
+      const { queryByText } = setup();
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      const firstParam = apiCalls.loadNewHoaxes.mock.calls[0][0];
+      expect(firstParam).toBe(10);
+      useRealIntervals();
+    });
+    fit("calls loadNewHoaxes with hoax id and username when clicking New Hoax Count Card", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetNewHoaxesList);
+      const { queryByText } = setup({ username: "user1" });
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      expect(apiCalls.loadNewHoaxes).toHaveBeenCalledWith(10, "user1");
+      useRealIntervals();
+    });
+    fit("displays loaded new hoax loadNewHoaxes api call success", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetNewHoaxesList);
+      const { queryByText } = setup({ username: "user1" });
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      const newHoax = await waitForElement(() =>
+        queryByText("This is the newest hoax test")
+      );
+      expect(newHoax).toBeInTheDocument();
+      useRealIntervals();
+    });
+    fit("hides new hoax count when loadNewHoaxes api call success", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetNewHoaxesList);
+      const { queryByText } = setup({ username: "user1" });
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      await waitForElement(() => queryByText("This is the newest hoax test"));
+      expect(queryByText("There is 1 new hoax")).not.toBeInTheDocument();
+      useRealIntervals();
+    });
+    fit("does not allow loadOldHoaxes to be called when there is an active api call about it", async () => {
+      // useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadOldHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesLastOfMultiPage);
+      const { queryByText } = setup();
+      const loadMore = await waitForElement(() => queryByText("Load More"));
+      fireEvent.click(loadMore);
+      fireEvent.click(loadMore);
+      // runTimer();
+      expect(apiCalls.loadOldHoaxes).toHaveBeenCalledTimes(1);
+      // useRealIntervals();
+    });
+    fit("replaces Load More spinner when there is an active api call about it", async () => {
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadOldHoaxes = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve(mockSuccessGetHoaxesLastOfMultiPage);
+          }, 300);
+        });
+      });
+      const { queryByText } = setup();
+      const loadMore = await waitForElement(() => queryByText("Load More"));
+      fireEvent.click(loadMore);
+      const spinner = await waitForElement(() => queryByText("Loading..."));
+      expect(spinner).toBeInTheDocument();
+      expect(queryByText("Load More")).not.toBeInTheDocument();
+    });
+    fit("replaces Load More spinner when there is an active api call about it", async () => {
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadOldHoaxes = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve(mockSuccessGetHoaxesLastOfMultiPage);
+          }, 300);
+        });
+      });
+      const { queryByText } = setup();
+      const loadMore = await waitForElement(() => queryByText("Load More"));
+      fireEvent.click(loadMore);
+      const spinner = await waitForElement(() => queryByText("Loading..."));
+      expect(spinner).toBeInTheDocument();
+      expect(queryByText("Load More")).not.toBeInTheDocument();
+    });
+    fit("replaces Spinner with Load More after active api call for loadOldHoaxes finishes with middle page response", async () => {
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadOldHoaxes = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve(mockSuccessGetHoaxesMiddleOfMultiPage);
+          }, 300);
+        });
+      });
+      const { queryByText } = setup();
+      const loadMore = await waitForElement(() => queryByText("Load More"));
+      fireEvent.click(loadMore);
+      await waitForElement(() => queryByText("This hoax is in middle page"));
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+      expect(queryByText("Load More")).toBeInTheDocument();
+    });
+    fit("replaces Spinner with Load More after active api call for loadOldHoaxes finishes error", async () => {
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadOldHoaxes = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            reject({ response: { data: {} } });
+          }, 300);
+        });
+      });
+      const { queryByText } = setup();
+      const loadMore = await waitForElement(() => queryByText("Load More"));
+      fireEvent.click(loadMore);
+      await waitForElement(() => queryByText("Loading..."));
+      await waitForDomChange();
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+      expect(queryByText("Load More")).toBeInTheDocument();
+    });
+    fit("does not allow loadNewHoaxes to be called when there is an active api call about it", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetNewHoaxesList);
+      const { queryByText } = setup({ user: "user1" });
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      fireEvent.click(newHoaxCount);
+
+      expect(apiCalls.loadNewHoaxes).toHaveBeenCalledTimes(1);
+      useRealIntervals();
+    });
+    fit("replaces There is 1 new hoax with spinner when there is an active api call about it", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve(mockSuccessGetNewHoaxesList);
+          }, 300);
+        });
+      });
+      const { queryByText } = setup();
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      const spinner = await waitForElement(() => queryByText("Loading..."));
+      expect(spinner).toBeInTheDocument();
+      expect(queryByText("There is 1 new hoax")).not.toBeInTheDocument();
+      useRealIntervals();
+    });
+    fit('removes Spinner and There is 1 new hoax after active api call for loadNewHoaxes finishes with success', async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+      .fn()
+      .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+      .fn()
+      .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest
+      .fn()
+      .mockResolvedValue(mockSuccessGetNewHoaxesList);
+      const { queryByText } = setup({ user: 'user1' });
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+          queryByText('There is 1 new hoax')
+      );
+      fireEvent.click(newHoaxCount);
+      await waitForElement(() => queryByText('This is the newest hoax'));
+      expect(queryByText('Loading...')).not.toBeInTheDocument();
+      expect(queryByText('There is 1 new hoax')).not.toBeInTheDocument();
+      useRealIntervals();
+    });
+    fit("replaces Spinner with There is 1 new hoax after active api call for loadNewHoaxes fails", async () => {
+      useFakeIntervals();
+      apiCalls.loadHoaxes = jest
+        .fn()
+        .mockResolvedValue(mockSuccessGetHoaxesFirstOfMultiPage);
+      apiCalls.loadNewHoaxCount = jest
+        .fn()
+        .mockResolvedValue({ data: { count: 1 } });
+      apiCalls.loadNewHoaxes = jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            reject({ response: { data: {} } });
+          }, 300);
+        });
+      });
+      const { queryByText } = setup();
+      await waitForDomChange();
+      runTimer();
+      const newHoaxCount = await waitForElement(() =>
+        queryByText("There is 1 new hoax")
+      );
+      fireEvent.click(newHoaxCount);
+      await waitForElement(() => queryByText("Loading..."));
+      await waitForDomChange();
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+      expect(queryByText("There is 1 new hoax")).toBeInTheDocument();
+      useRealIntervals();
     });
   });
 });

@@ -41,8 +41,16 @@ export function loadOldHoaxes(hoaxId, username) {
   }
 }
 
-export function loadNewHoaxes(hoaxId) {
-  return loadHoaxesById(hoaxId, { page: 0, size: 5, direction: "after" });
+export function loadNewHoaxes(hoaxId, username) {
+  if (username) {
+    return loadHoaxesOfUserById(username, hoaxId, {
+      page: 0,
+      size: 5,
+      direction: "after"
+    });
+  } else {
+    return loadHoaxesById(hoaxId, { page: 0, size: 5, direction: "after" });
+  }
 }
 
 export function loadHoaxesById(
