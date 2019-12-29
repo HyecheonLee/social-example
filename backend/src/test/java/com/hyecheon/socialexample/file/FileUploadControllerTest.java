@@ -4,8 +4,8 @@ import com.hyecheon.socialexample.TestUtil;
 import com.hyecheon.socialexample.configuration.AppConfiguration;
 import com.hyecheon.socialexample.user.UserRepository;
 import com.hyecheon.socialexample.user.UserService;
+import com.sun.xml.bind.v2.runtime.output.NamespaceContextImpl;
 import org.apache.commons.io.FileUtils;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,9 +43,13 @@ class FileUploadControllerTest {
     @Autowired
     AppConfiguration appConfiguration;
 
+    @Autowired
+    FileAttachmentRepository fileAttachmentRepository;
+
     @BeforeEach
     public void init() throws IOException {
         userRepository.deleteAll();
+        fileAttachmentRepository.deleteAll();
         testRestTemplate.getRestTemplate().getInterceptors().clear();
         FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
     }
@@ -69,7 +72,7 @@ class FileUploadControllerTest {
     public void uploadFile_withImageFromAuthorizedUser_receiveFileAttachmentWithDate() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
-        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        ResponseEntity<FileAttachmentVM> response = uploadFile(getRequestEntity(), FileAttachmentVM.class);
         assertThat(response.getBody().getCreatedAt()).isNotNull();
     }
 
@@ -77,9 +80,37 @@ class FileUploadControllerTest {
     public void uploadFile_withImageFromAuthorizedUser_receiveFileAttachmentWithRandomName() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
-        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        ResponseEntity<FileAttachmentVM> response = uploadFile(getRequestEntity(), FileAttachmentVM.class);
         assertThat(response.getBody().getName()).isNotNull();
         assertThat(response.getBody().getName()).isNotEqualTo("profile.png");
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_imageSavedToFolder() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        ResponseEntity<FileAttachmentVM> response = uploadFile(getRequestEntity(), FileAttachmentVM.class);
+        String imagePath = appConfiguration.getFullAttachmentsPath() + "/" + response.getBody().getName();
+        File storedImage = new File(imagePath);
+        assertThat(storedImage.exists()).isTrue();
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_fileAttachmentSavedToDatabase() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        uploadFile(getRequestEntity(), FileAttachmentVM.class);
+        assertThat(fileAttachmentRepository.count()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_fileAttachmentStoredWithFileType() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        uploadFile(getRequestEntity(), FileAttachmentVM.class);
+        FileAttachment storedFile = fileAttachmentRepository.findAll().get(0);
+        assertThat(storedFile.getFileType()).isEqualTo("image/png");
     }
 
     public <T> ResponseEntity<T> uploadFile(HttpEntity<?> requestEntity, Class<T> responseType) {

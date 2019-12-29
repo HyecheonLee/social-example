@@ -1,6 +1,8 @@
 package com.hyecheon.socialexample.hoax.vm;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hyecheon.socialexample.file.FileAttachment;
+import com.hyecheon.socialexample.file.FileAttachmentVM;
 import com.hyecheon.socialexample.hoax.Hoax;
 import com.hyecheon.socialexample.user.vm.UserVM;
 import lombok.Data;
@@ -16,6 +18,7 @@ public class HoaxVM {
     private String content;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
+    private FileAttachmentVM attachment;
 
 
     public HoaxVM(Hoax hoax) {
@@ -23,5 +26,6 @@ public class HoaxVM {
         user = new UserVM(hoax.getUser());
         content = hoax.getContent();
         timestamp = hoax.getTimestamp();
+        attachment = new FileAttachmentVM(hoax.getAttachment());
     }
 }

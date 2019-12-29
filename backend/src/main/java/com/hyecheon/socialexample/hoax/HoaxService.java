@@ -1,5 +1,7 @@
 package com.hyecheon.socialexample.hoax;
 
+import com.hyecheon.socialexample.file.FileAttachment;
+import com.hyecheon.socialexample.file.FileAttachmentRepository;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserService;
 import com.querydsl.core.types.ExpressionUtils;
@@ -18,9 +20,15 @@ import org.springframework.util.StringUtils;
 public class HoaxService {
     private final HoaxRepository hoaxRepository;
     private final UserService userService;
+    private final FileAttachmentRepository fileAttachmentRepository;
 
     public Hoax save(User user, Hoax hoax) {
         hoax.setUser(user);
+        if (hoax.getAttachment() != null) {
+            final FileAttachment inDB = fileAttachmentRepository.findById(hoax.getAttachment().getId()).get();
+            inDB.setHoax(hoax);
+            hoax.setAttachment(inDB);
+        }
         return hoaxRepository.save(hoax);
     }
 

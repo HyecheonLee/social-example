@@ -15,8 +15,8 @@ public class FileAttachment {
     @GeneratedValue
     private long id;
 
-    @Column(updatable = false)
-    @CreationTimestamp
+//    @Column(updatable = false)
+//    @CreationTimestamp
     private LocalDateTime createdAt;
 
     private String name;

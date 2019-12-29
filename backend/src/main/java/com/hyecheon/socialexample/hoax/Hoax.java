@@ -1,6 +1,7 @@
 package com.hyecheon.socialexample.hoax;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hyecheon.socialexample.file.FileAttachment;
 import com.hyecheon.socialexample.user.User;
 import lombok.Data;
 import lombok.ToString;
@@ -33,4 +34,7 @@ public class Hoax {
     @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @CreationTimestamp
     private LocalDateTime timestamp;
+
+    @OneToOne(mappedBy = "hoax", orphanRemoval = true, cascade = CascadeType.ALL)
+    private FileAttachment attachment;
 }

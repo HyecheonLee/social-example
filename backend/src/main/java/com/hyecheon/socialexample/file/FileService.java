@@ -5,9 +5,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,11 +19,12 @@ import java.util.UUID;
 @Service
 public class FileService {
     private final AppConfiguration appConfiguration;
-
+    private final FileAttachmentRepository fileAttachmentRepository;
     private final Tika tika;
 
-    public FileService(AppConfiguration appConfiguration) {
+    public FileService(AppConfiguration appConfiguration, FileAttachmentRepository fileAttachmentRepository) {
         this.appConfiguration = appConfiguration;
+        this.fileAttachmentRepository = fileAttachmentRepository;
         tika = new Tika();
     }
 
@@ -58,10 +61,20 @@ public class FileService {
     }
 
     public FileAttachment saveAttachment(MultipartFile file) {
-        final FileAttachment fileAttachment = new FileAttachment();
-        fileAttachment.setCreatedAt(LocalDateTime.now());
-        fileAttachment.setName(getRandomName());
-        return fileAttachment;
+        try {
+            final String fileType = detectType(file.getBytes());
+            final String saveFileName = getRandomName() + getExtension(fileType);
+            final String filePath = appConfiguration.getFullAttachmentsPath() + "/" + saveFileName;
+            FileCopyUtils.copy(file.getBytes(), new File(filePath));
+            final FileAttachment fileAttachment = new FileAttachment();
+            fileAttachment.setName(saveFileName);
+            fileAttachment.setFileType(fileType);
+            fileAttachmentRepository.save(fileAttachment);
+            return fileAttachment;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     private String getRandomName() {

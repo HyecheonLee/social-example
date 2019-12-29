@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -25,7 +26,7 @@ class FileServiceTest {
         appConfiguration = new AppConfiguration();
         appConfiguration.setUploadPath("upload-test");
 
-        fileService = new FileService(appConfiguration);
+        fileService = new FileService(appConfiguration, null);
 
         new File(appConfiguration.getUploadPath()).mkdir();
         new File(appConfiguration.getFullProfileImagePath()).mkdir();
