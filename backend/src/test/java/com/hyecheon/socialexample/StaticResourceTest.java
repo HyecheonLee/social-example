@@ -5,7 +5,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.engine.support.descriptor.ClasspathResourceSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,7 +41,7 @@ public class StaticResourceTest {
 
     @Test
     void checkStaticFolder_whenAppIsInitialized_profileImageSubFolderMustExist() {
-        final String profileImageFolderPath = appConfiguration.getFullProfileImagePath();
+        final String profileImageFolderPath = appConfiguration.getFullProfileImagesPath();
 
         final File profileImageFolder = new File(profileImageFolderPath);
         final boolean profileImageFolderExists = profileImageFolder.exists() && profileImageFolder.isDirectory();
@@ -63,7 +61,7 @@ public class StaticResourceTest {
         String fileName = "profile-picture.png";
         final File source = new ClassPathResource("profile.png").getFile();
 
-        final File target = new File(appConfiguration.getFullProfileImagePath() + "/" + fileName);
+        final File target = new File(appConfiguration.getFullProfileImagesPath() + "/" + fileName);
         FileUtils.copyFile(source, target);
 
         mockMvc.perform(get("/images/" + appConfiguration.getProfileImageFolder() + "/" + fileName)).andExpect(status().isOk());
@@ -104,7 +102,7 @@ public class StaticResourceTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagePath()));
+        FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagesPath()));
         FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
     }
 }

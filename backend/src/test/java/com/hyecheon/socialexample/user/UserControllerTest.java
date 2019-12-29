@@ -469,7 +469,7 @@ public class UserControllerTest {
         final ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
 
         final String storedImageName = response.getBody().getImage();
-        final String profilePicturePath = appConfiguration.getFullProfileImagePath() + "/" + storedImageName;
+        final String profilePicturePath = appConfiguration.getFullProfileImagesPath() + "/" + storedImageName;
 
         final File storedImage = new File(profilePicturePath);
 
@@ -570,14 +570,14 @@ public class UserControllerTest {
         putUser(user.getId(), requestEntity, UserVM.class);
 
         String storedImageName = response.getBody().getImage();
-        final String profilePicturePath = appConfiguration.getFullProfileImagePath() + "/" + storedImageName;
+        final String profilePicturePath = appConfiguration.getFullProfileImagesPath() + "/" + storedImageName;
         final File storedImage = new File(profilePicturePath);
         assertThat(storedImage.exists()).isFalse();
     }
 
     @AfterEach
     void clearDir() throws IOException {
-        FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagePath()));
+        FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagesPath()));
         FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
     }
 
