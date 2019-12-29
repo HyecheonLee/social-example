@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-
 public class HoaxControllerTest {
     public static final String API_1_0_HOAXES = "/api/1.0/hoaxes";
     @Autowired

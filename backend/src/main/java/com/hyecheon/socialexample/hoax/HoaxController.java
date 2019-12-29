@@ -4,7 +4,6 @@ import com.hyecheon.socialexample.hoax.vm.HoaxVM;
 import com.hyecheon.socialexample.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
