@@ -59,13 +59,28 @@ class FileUploadControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-
     @Test
     void uploadFile_withImageFromUnauthorizedUser_receiveUnauthorized() {
         ResponseEntity<Object> response = uploadFile(getRequestEntity(), Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_receiveFileAttachmentWithDate() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        assertThat(response.getBody().getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_receiveFileAttachmentWithRandomName() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+        assertThat(response.getBody().getName()).isNotNull();
+        assertThat(response.getBody().getName()).isNotEqualTo("profile.png");
+    }
 
     public <T> ResponseEntity<T> uploadFile(HttpEntity<?> requestEntity, Class<T> responseType) {
         return testRestTemplate.exchange(API_1_0_HOAXES_UPLOAD, HttpMethod.POST, requestEntity, responseType);
