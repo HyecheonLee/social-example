@@ -4,17 +4,21 @@ const USER_URL = "/api/1.0/users";
 const LOGIN_URL = "/api/1.0/login";
 const HOAX_URL = "/api/1.0/hoaxes";
 
+export function postHoaxFile(file) {
+  return axios.post(`${HOAX_URL}/upload`, file);
+}
+
 export function loadNewHoaxCount(hoaxId, username) {
   if (username) {
-    return loadHoaxesOfUserCountById(username, hoaxId, { direction: "after" });
+    return loadHoaxesOfUserCountById(username, hoaxId, {direction: "after"});
   } else {
-    return loadHoaxesCountById(hoaxId, { direction: "after" });
+    return loadHoaxesCountById(hoaxId, {direction: "after"});
   }
 }
 
 export function loadHoaxesOfUserCountById(username, hoaxId, params) {
   const path = `${USER_URL}/${username}/hoaxes/${hoaxId}/count${makeParam(
-    params
+      params
   )}`;
   return axios.get(path);
 }
@@ -37,7 +41,7 @@ export function loadOldHoaxes(hoaxId, username) {
       direction: "before"
     });
   } else {
-    return loadHoaxesById(hoaxId, { page: 0, size: 5, direction: "before" });
+    return loadHoaxesById(hoaxId, {page: 0, size: 5, direction: "before"});
   }
 }
 
@@ -49,13 +53,13 @@ export function loadNewHoaxes(hoaxId, username) {
       direction: "after"
     });
   } else {
-    return loadHoaxesById(hoaxId, { page: 0, size: 5, direction: "after" });
+    return loadHoaxesById(hoaxId, {page: 0, size: 5, direction: "after"});
   }
 }
 
 export function loadHoaxesById(
-  hoaxId,
-  params = { page: 0, size: 5, direction: "after" }
+    hoaxId,
+    params = {page: 0, size: 5, direction: "after"}
 ) {
   const path = `${HOAX_URL}/${hoaxId}${makeParam(params)}`;
   return axios.get(path);
@@ -77,13 +81,13 @@ function makeParam(params) {
   } else {
     const keys = ["direction", "page", "size", "sort"];
     const result = keys
-      .filter(value => {
-        return params.hasOwnProperty(value);
-      })
-      .map(value => {
-        return value + "=" + params[value];
-      })
-      .join("&");
+    .filter(value => {
+      return params.hasOwnProperty(value);
+    })
+    .map(value => {
+      return value + "=" + params[value];
+    })
+    .join("&");
     if (result) {
       return "?" + result;
     }
@@ -103,9 +107,9 @@ export function getUser(username) {
   return axios.get(`${USER_URL}/${username}`);
 }
 
-export function listUsers(param = { page: 0, size: 3 }) {
+export function listUsers(param = {page: 0, size: 3}) {
   return axios.get(
-    `${USER_URL}?page=${param.page || 0}&size=${param.size || 3}`
+      `${USER_URL}?page=${param.page || 0}&size=${param.size || 3}`
   );
 }
 
@@ -113,12 +117,12 @@ export const signup = user => {
   return axios.post(USER_URL, user);
 };
 export const login = user => {
-  return axios.post(LOGIN_URL, {}, { auth: user });
+  return axios.post(LOGIN_URL, {}, {auth: user});
 };
-export const setAuthorizationHeader = ({ username, password, isLoggedIn }) => {
+export const setAuthorizationHeader = ({username, password, isLoggedIn}) => {
   if (isLoggedIn) {
     axios.defaults.headers.common["Authorization"] = `Basic ${btoa(
-      username + ":" + password
+        username + ":" + password
     )}`;
   } else {
     delete axios.defaults.headers.common["Authorization"];
