@@ -12,4 +12,6 @@ import java.util.List;
 public interface HoaxRepository extends JpaRepository<Hoax, Long>, QuerydslPredicateExecutor<Hoax> {
 
     Page<Hoax> findByUser(User user, Pageable pageable);
+
+    boolean existsByUserAndId(User user, Long id);
 }

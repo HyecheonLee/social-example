@@ -1,7 +1,9 @@
 package com.hyecheon.socialexample.hoax;
 
+import com.hyecheon.socialexample.error.NotFoundException;
 import com.hyecheon.socialexample.file.FileAttachment;
 import com.hyecheon.socialexample.file.FileAttachmentRepository;
+import com.hyecheon.socialexample.file.FileService;
 import com.hyecheon.socialexample.user.User;
 import com.hyecheon.socialexample.user.UserService;
 import com.querydsl.core.types.ExpressionUtils;
@@ -21,6 +23,7 @@ public class HoaxService {
     private final HoaxRepository hoaxRepository;
     private final UserService userService;
     private final FileAttachmentRepository fileAttachmentRepository;
+    private final FileService fileService;
 
     public Hoax save(User user, Hoax hoax) {
         hoax.setUser(user);
@@ -60,6 +63,11 @@ public class HoaxService {
         return hoaxRepository.count(predicate);
     }
 
+    public void deleteHoax(long id) {
+        final Hoax hoax = hoaxRepository.findById(id).orElseThrow(() -> new NotFoundException("Hoax not found "));
+        fileService.deleteAttachmentImage(hoax.getAttachment().getName());
+        hoaxRepository.deleteById(id);
+    }
 
     private BooleanExpression eqUsername(String username) {
         if (StringUtils.hasText(username)) {
@@ -79,4 +87,5 @@ public class HoaxService {
     private BooleanExpression lessThenId(Long id) {
         return QHoax.hoax.id.lt(id);
     }
+
 }

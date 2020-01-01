@@ -1,11 +1,13 @@
 package com.hyecheon.socialexample.hoax;
 
 import com.hyecheon.socialexample.hoax.vm.HoaxVM;
+import com.hyecheon.socialexample.shared.GenericResponse;
 import com.hyecheon.socialexample.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,5 +57,12 @@ public class HoaxController {
             count = hoaxService.getNewHoaxesCount(username, id);
         }
         return ResponseEntity.ok(count);
+    }
+
+    @DeleteMapping("/hoaxes/{id:[0-9]+}")
+    @PreAuthorize("@hoaxSecurityService.isAllowedToDelete(#id, principal)")
+    ResponseEntity<?> deleteHoax(@PathVariable long id) {
+        hoaxService.deleteHoax(id);
+        return ResponseEntity.ok("Hoax is removed");
     }
 }
