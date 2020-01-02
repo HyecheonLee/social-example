@@ -1,10 +1,10 @@
 import React from "react";
-import { fireEvent, render, waitForDomChange } from "@testing-library/react";
+import {render} from "@testing-library/react";
 import HoaxView from "./HoaxView";
-import { MemoryRouter } from "react-router-dom";
+import {MemoryRouter} from "react-router-dom";
 import rootReducer from "../redux";
-import { createStore } from "redux";
-import { Provider } from "react-redux";
+import {createStore} from "redux";
+import {Provider} from "react-redux";
 
 const loggedInStateUser1 = {
   id: 1,

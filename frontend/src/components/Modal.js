@@ -39,7 +39,7 @@ const Modal = props => {
               </button>
               <ButtonWithProgress
                   className="btn btn-danger"
-                  onClick={onClickOk}
+                  onClick={e=>onClickOk(e)}
                   disabled={pendingApiCall}
                   pendingApiCall={pendingApiCall}
                   text={okButton}

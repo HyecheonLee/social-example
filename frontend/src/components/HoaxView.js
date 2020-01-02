@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { format } from "timeago.js";
 import { useSelector } from "react-redux";
 
-function HoaxView({ hoax }) {
+function HoaxView({ hoax, onClickDelete }) {
   const { user } = hoax;
   const auth = useSelector(state => ({ ...state.auth }));
   const relativeDate = format(hoax.timestamp, "ko");
@@ -29,7 +29,10 @@ function HoaxView({ hoax }) {
           <span className={"text-black-50"}>{relativeDate}</span>
         </div>
         {auth.id === user.id && (
-          <button className="btn btn-outline-danger btn-sm">
+          <button
+            onClick={onClickDelete}
+            className="btn btn-outline-danger btn-sm"
+          >
             <i className="far fa-trash-alt" />
           </button>
         )}

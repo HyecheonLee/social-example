@@ -2,9 +2,15 @@ import React, { useEffect, useState } from "react";
 import * as apiCalls from "../api/apiCalls";
 import Spinner from "./Spinner";
 import HoaxView from "./HoaxView";
+import Modal from "./Modal";
 
 function HoaxFeed({ username = "" }) {
   const [counter, setCounter] = useState(0);
+  const [modal, setModal] = useState({
+    visible: false,
+    hoaxToBeDeleted: undefined,
+    pendingApiCall: false
+  });
   const [state, setState] = useState({
     page: {
       content: []
@@ -37,11 +43,11 @@ function HoaxFeed({ username = "" }) {
     if (hoaxes.length > 0) {
       topHoaxId = hoaxes[0].id;
     }
-    apiCalls.loadNewHoaxCount(topHoaxId, username).then(value => {
-      if (value.data.count) {
+    apiCalls.loadNewHoaxCount(topHoaxId, username).then(response => {
+      if (response.data) {
         setState(prevState => ({
           ...prevState,
-          newHoaxCount: value.data.count
+          newHoaxCount: response.data
         }));
       }
     });
@@ -99,6 +105,37 @@ function HoaxFeed({ username = "" }) {
         }));
       });
   };
+  const onClickOk = e => {
+    setModal(prevState => ({
+      ...prevState,
+      pendingApiCall: true
+    }));
+    apiCalls
+      .deleteHoax(modal.hoaxToBeDeleted.id)
+      .then(value => {
+        setState(prevState => ({
+          ...prevState,
+          page: {
+            ...prevState.page,
+            content: prevState.page.content.filter(
+              hoax => hoax.id !== modal.hoaxToBeDeleted.id
+            )
+          }
+        }));
+        setModal({
+          visible: false,
+          hoaxToBeDeleted: undefined,
+          pendingApiCall: false
+        });
+      })
+      .catch(error => {
+        setModal(prevState => ({
+          visible: false,
+          hoaxToBeDeleted: undefined,
+          pendingApiCall: false
+        }));
+      });
+  };
   if (state.page.content.length === 0 && state.newHoaxCount === 0) {
     return (
       <div className="card card-header text-center">There are no hoaxes</div>
@@ -124,7 +161,19 @@ function HoaxFeed({ username = "" }) {
         </div>
       )}
       {state.page.content.map(hoax => {
-        return <HoaxView key={hoax.id} hoax={hoax} />;
+        return (
+          <HoaxView
+            key={hoax.id}
+            hoax={hoax}
+            onClickDelete={e =>
+              setModal({
+                visible: true,
+                hoaxToBeDeleted: hoax,
+                pendingApiCall: false
+              })
+            }
+          />
+        );
       })}
       {state.page.last === false && (
         <div
@@ -137,6 +186,18 @@ function HoaxFeed({ username = "" }) {
           {state.isLoadingOldHoaxes ? <Spinner /> : "Load More"}
         </div>
       )}
+      <Modal
+        visible={modal.visible}
+        onClickCancel={e => setModal({ visible: false })}
+        body={
+          modal.hoaxToBeDeleted &&
+          `Are you sure to delete '${modal.hoaxToBeDeleted.content}'?`
+        }
+        title="Delete!"
+        okButton="Delete Hoax"
+        onClickOk={onClickOk}
+        pendingApiCall={modal.pendingApiCall}
+      />
     </div>
   );
 }
