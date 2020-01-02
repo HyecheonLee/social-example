@@ -2,6 +2,27 @@ import React from "react";
 import { fireEvent, render, waitForDomChange } from "@testing-library/react";
 import HoaxView from "./HoaxView";
 import { MemoryRouter } from "react-router-dom";
+import rootReducer from "../redux";
+import { createStore } from "redux";
+import { Provider } from "react-redux";
+
+const loggedInStateUser1 = {
+  id: 1,
+  username: "user1",
+  displayName: "display1",
+  image: "profile1.png",
+  password: "P4ssword",
+  isLoggedIn: true
+};
+
+const loggedInStateUser2 = {
+  id: 2,
+  username: "user2",
+  displayName: "display2",
+  image: "profile2.png",
+  password: "P4ssword",
+  isLoggedIn: true
+};
 
 const hoaxWithoutAttachment = {
   id: 1,
@@ -42,13 +63,16 @@ const hoaxWithPdfAttachment = {
   }
 };
 
-const setup = (hoax = hoaxWithoutAttachment) => {
+const setup = (hoax = hoaxWithoutAttachment, state = loggedInStateUser1) => {
   const oneMinute = 60 * 1000;
   hoax.timestamp = new Date(new Date() - oneMinute);
+  const store = createStore(rootReducer, { auth: { ...state } });
   return render(
-    <MemoryRouter>
-      <HoaxView hoax={hoax} />
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter>
+        <HoaxView hoax={hoax} />
+      </MemoryRouter>
+    </Provider>
   );
 };
 describe("HoaxView", () => {
@@ -92,6 +116,14 @@ describe("HoaxView", () => {
       expect(attachmentImage.src).toContain(
         "/images/attachments/" + hoaxWithAttachment.attachment.name
       );
+    });
+    it("displays delete button when hoax owned by logged in user", () => {
+      const { container } = setup();
+      expect(container.querySelector("button")).toBeInTheDocument();
+    });
+    it("does not display delete button when hoax is not owned by logged in user", () => {
+      const { container } = setup(hoaxWithoutAttachment, loggedInStateUser2);
+      expect(container.querySelector("button")).not.toBeInTheDocument();
     });
   });
 });

@@ -4,6 +4,11 @@ const USER_URL = "/api/1.0/users";
 const LOGIN_URL = "/api/1.0/login";
 const HOAX_URL = "/api/1.0/hoaxes";
 
+export function deleteHoax(hoaxId) {
+  return axios.delete(`${HOAX_URL}/${hoaxId}`)
+}
+
+
 export function postHoaxFile(file) {
   return axios.post(`${HOAX_URL}/upload`, file);
 }
